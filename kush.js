@@ -71,4 +71,32 @@ function buttonElementCheck() {
         });
     }
 }
-buttonElementCheck();
+
+function redundantLinkCheck(){
+    const links = document.querySelectorAll('a');  // Get all <a> elements
+    const hrefs = new Set();  // To store unique hrefs
+    const redundantLinks = [];  // To store redundant links
+    
+    // Iterate over all links
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+        
+        // Check if the href is already encountered
+        if (href && hrefs.has(href)) {
+            redundantLinks.push(link);  // Add the redundant link to the array
+        } else {
+            hrefs.add(href);  // Otherwise, add the href to the set
+        }
+    });
+    
+    // If redundant links are found, print them
+    if (redundantLinks.length > 0) {
+        console.log('Redundant Links found:');
+        redundantLinks.forEach(link => {
+            console.log(link);
+        });
+    } else {
+        console.log('No redundant links found.');
+    }
+}
+redundantLinkCheck();
