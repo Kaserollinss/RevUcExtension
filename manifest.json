@@ -10,7 +10,7 @@
   "content_scripts": [
     {
       "js": [
-        "content-script.js"
+        "content-script.js", "jquery-3.7.1.js", "saarthak.js", "matt.js", "kush.js", "kase.js"
       ],
       "matches": [
         "http://*/*", "https://*/*"
