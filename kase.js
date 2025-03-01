@@ -54,6 +54,3 @@ function detectMissingHeaders() {
         console.log(`✅ Found ${headers.length} header tag(s) on this page.`);
     }
 }
-
-// Run the function
-detectMissingHeaders();
