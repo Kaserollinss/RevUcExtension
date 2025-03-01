@@ -13,7 +13,7 @@
         "content-script.js"
       ],
       "matches": [
-        "http://*.*//"
+        "http://*/*", "https://*/*"
       ]
     }
   ]
