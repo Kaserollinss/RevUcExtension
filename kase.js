@@ -40,3 +40,20 @@ function detectEmptyLinks() {
         console.log("✅ All <a> tags have valid href attributes.");
     }
 }
+
+function detectMissingHeaders() {
+    const headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6"); // Select all header tags
+
+    if (headers.length === 0) {
+        console.warn("❌ No header tags (h1-h6) detected on this page.");
+
+        // Highlight the body to show the issue
+        document.body.style.border = "5px solid red";
+        console.warn("Page highlighted with red border due to missing headers.");
+    } else {
+        console.log(`✅ Found ${headers.length} header tag(s) on this page.`);
+    }
+}
+
+// Run the function
+detectMissingHeaders();
