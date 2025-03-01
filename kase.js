@@ -22,3 +22,27 @@ function detectUnclosedTagsFromDOM() {
 
 // Run function on live webpage
 //detectUnclosedTagsFromDOM();
+
+function detectEmptyLinks() {
+    const links = document.querySelectorAll("a"); // Get all <a> elements
+    const emptyLinks = [];
+
+    links.forEach((link) => {
+        if (!link.hasAttribute("href") || link.getAttribute("href").trim() === "") {
+            emptyLinks.push(link);
+        }
+    });
+
+    if (emptyLinks.length > 0) {
+        console.warn(`❌ Found ${emptyLinks.length} <a> tags without an href:`, emptyLinks);
+        emptyLinks.forEach((link, index) => {
+            link.style.border = "2px solid red"; // Highlight them on the page
+            console.warn(`Missing href in <a> tag #${index + 1}:`, link.outerHTML);
+        });
+    } else {
+        console.log("✅ All <a> tags have valid href attributes.");
+    }
+}
+
+// Run function on live webpage
+detectEmptyLinks();
