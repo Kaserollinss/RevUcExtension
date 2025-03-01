@@ -1,1 +1,0 @@
-$("div").css("color", "red");
