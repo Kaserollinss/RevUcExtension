@@ -22,17 +22,14 @@ function detectUnclosedTagsFromDOM() {
 
 // Run function on live webpage
 //detectUnclosedTagsFromDOM();
-
 function detectEmptyLinks() {
     const links = document.querySelectorAll("a"); // Get all <a> elements
     const emptyLinks = [];
-
     links.forEach((link) => {
         if (!link.hasAttribute("href") || link.getAttribute("href").trim() === "") {
             emptyLinks.push(link);
         }
     });
-
     if (emptyLinks.length > 0) {
         console.warn(`❌ Found ${emptyLinks.length} <a> tags without an href:`, emptyLinks);
         emptyLinks.forEach((link, index) => {
@@ -44,5 +41,16 @@ function detectEmptyLinks() {
     }
 }
 
-// Run function on live webpage
-detectEmptyLinks();
+function detectMissingHeaders() {
+    const headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6"); // Select all header tags
+
+    if (headers.length === 0) {
+        console.warn("❌ No header tags (h1-h6) detected on this page.");
+
+        // Highlight the body to show the issue
+        document.body.style.border = "5px solid red";
+        console.warn("Page highlighted with red border due to missing headers.");
+    } else {
+        console.log(`✅ Found ${headers.length} header tag(s) on this page.`);
+    }
+}
