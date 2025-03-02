@@ -26,6 +26,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+
+
+// Function to scroll to a specific element by ID
+function scrollToElement(elementId) {
+const element = document.getElementById(elementId); // Use getElementById for ID lookup
+if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+} else {
+    console.warn(`Element with ID "${elementId}" not found.`);
+}
+}
+
 function switchTab(event, pageId) {
     // Hide all content sections
     document.querySelectorAll('.content').forEach(content => {
@@ -105,6 +117,14 @@ function displayAccessibilitySummary(data) {
 
                     const image = document.createElement('img');
                     image.src = "/Assets/Icons/broken_button.svg"
+                    image.classList.add("image-target")
+
+// Loop through each element and add the event listener
+                    image.addEventListener("click", function() {
+                        scrollToElement(element);
+                    });
+                
+                    //image.setAttribute("element-html", document.getElementsByClassName(element)[0])
     
                     
 
