@@ -724,6 +724,8 @@ function redundantLinkCheck() {
 
 
 async function collectAccessibilityIssues() {
+    console.log("🔹 Collecting accessibility issues...");
+
     const issues = {
         unclosedTags: detectUnclosedTagsFromDOM(),
         emptyLinks: detectEmptyLinks(),
@@ -741,7 +743,12 @@ async function collectAccessibilityIssues() {
         redundantLinks: redundantLinkCheck(),
     };
 
-    console.log("🔹 Accessibility issues collected:", issues);
+    console.log("🔹 Issues detected, waiting for DOM updates...");
+
+    // Wait to ensure DOM updates are complete
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    console.log("✅ Sending accessibility issues to background:", issues);
 
     chrome.runtime.sendMessage(
         { type: "accessibilityIssues", data: issues },
@@ -754,8 +761,9 @@ async function collectAccessibilityIssues() {
         }
     );
 
-    return issues; // <-- Ensure it returns issues
+    return issues;
 }
+
 
 
 // Call the function to detect issues and send them
@@ -791,6 +799,8 @@ async function testGeminiAPI(params) {
     - Missing language elements: ${langElementsSize}
     Keep it brief and actionable.
     `;
+
+    console.log(`PROMPT==:>>>>>>>>> ${prompt}`);
 
     const requestBody = {
         contents: [{ parts: [{ text: prompt }] }]
