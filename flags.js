@@ -617,9 +617,9 @@ async function testGeminiAPI() {
 }
 
 // Run the test function
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('hiii');
-    document.getElementById('generateReport').addEventListener('click', function(){
-        testGeminiAPI();
-    });
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     console.log('hiii');
+//     document.getElementById('generateReport').addEventListener('click', function(){
+//         testGeminiAPI();
+//     });
+// });
