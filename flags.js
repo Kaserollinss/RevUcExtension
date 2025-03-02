@@ -730,11 +730,11 @@ async function collectAccessibilityIssues() {
         missingLabels: await checkInputLabels(),
         missingLangAttributes: await langElementsCheck(),
         buttonElementAccesible : await buttonElementAccesibleCheck(),
-        buttonElementAccesible : await buttonElementWhiteSpaceTextCheck(),
-        buttonElementAccesible : await buttonElementNullTextCheck(),
-        buttonElementAccesible : await buttonElementNoLabelCheck(),
-        buttonElementAccesible : await buttonElementHiddenTextCheck(),
-        buttonElementAccesible : await buttonElementEmptyAltCheck(),
+        buttonElementWhiteSpaceText : await buttonElementWhiteSpaceTextCheck(),
+        buttonElementNullText : await buttonElementNullTextCheck(),
+        buttonElementNoLabel : await buttonElementNoLabelCheck(),
+        buttonElementHiddenText : await buttonElementHiddenTextCheck(),
+        buttonElementEmptyAlt : await buttonElementEmptyAltCheck(),
         // buttonIssues: await buttonElementCheck(),
         redundantLinks: await redundantLinkCheck(),
     };
@@ -780,19 +780,18 @@ async function testGeminiAPI() {
     const inputLabelSize = (checkInputLabels()).length;
     const langElementsSize = (langElementsCheck()).length;
     const prompt = `
-        Based on the following data, please provide a detailed summary for the user. The summary should include:
+    Highlight the two biggest accessibility issues on this website, explaining:
+    - What they are and why they matter.
+    - A quick fix for each.
 
-        1. An explanation of each error found on the website, describing what each error means.
-        2. An explanation of why these errors are important, particularly from an accessibility perspective.
-        3. Suggestions on how to resolve these issues, along with recommendations to improve website accessibility and reduce potential accessibility issues.
-
-        Here is the data:
-        - Unclosed tags: ${unclosedTagSize}
-        - Empty links: ${emptyLinkSize}
-        - Redundant links: ${redundantLinkSize}
-        - Small text elements: ${smallTextSize}
-        - Missing input labels: ${inputLabelSize}
-        - Language elements: ${langElementsSize}
+   Then, briefly list the remaining issues:
+    - Unclosed tags: ${unclosedTagSize}
+    - Empty links: ${emptyLinkSize}
+    - Redundant links: ${redundantLinkSize}
+    - Small text: ${smallTextSize}
+    - Missing input labels: ${inputLabelSize}
+    - Missing language elements: ${langElementsSize}
+    Keep it brief and actionable. Please present this summary in a professional and actionable manner.
     `;
     const requestBody = {
         contents: [{ parts: [{ text: prompt }] }]
@@ -811,8 +810,9 @@ async function testGeminiAPI() {
         const rawText = data.candidates[0].content.parts[0].text;
         const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
         const displayText = cleanedText;
-        // Display it in your HTML (assuming there's an element with id "geminiResponse")
-        //document.getElementById("geminiResponse").innerText = displayText;
+        //Display it in your HTML (assuming there's an element with id "geminiResponse")
+        document.getElementById("aiFixesPage").classList.remove("hidden"); 
+        document.getElementById("geminiResponse").innerText = cleanedText;
         console.log("Cleaned Text:", displayText);
 
     } catch (error) {
