@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+    const script = document.createElement('script');
+
+    // Set the src attribute to the Bootstrap bundle
+    script.src = "Assets/bootstrap.bundle.js";
+// Append the script tag to the document head
+    document.head.appendChild(script);
+
     // Get the buttons
     const summaryTab = document.getElementById("summaryTab");
     const detailsButton = document.getElementById("detailsTab");
@@ -40,16 +48,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "accessibilityIssues") {
         console.log("✅ Received accessibility issues in sidebar:", message.data);
         displayAccessibilitySummary(message.data);
+        sendResponse({ success: true });  // ✅ Always send a response
+        return true;  // ✅ Keep the channel open if needed
     }
 
-    // If you don't need to send a response, remove 'return true'
-    return false; // OR make sure 'sendResponse' is actually called
+    sendResponse({ success: false, error: "Unknown request" });
+    return false;
 });
-
 
 // Function to update the sidebar with the summary
 function displayAccessibilitySummary(data) {
-    const sidebarContainer = document.getElementById("error-summary");
+    const sidebarContainer = document.getElementById("summaryPage");
 
     // Clear previous content
     sidebarContainer.innerHTML = "";
@@ -57,28 +66,70 @@ function displayAccessibilitySummary(data) {
     // Iterate over the issues and display them
     for (const [issue, elements] of Object.entries(data)) {
         if (elements && elements.length > 0) {
-            // Add to summary page
+            // Details Page
+                
             
+            // Summary Page
+                // Create collapse toggle button
+                const link = document.createElement('a');
+                link.classList.add('float-end');
+                link.setAttribute('data-bs-toggle', 'collapse');
+                link.setAttribute('href', `#${issue}-target`);
+                link.setAttribute('role', 'button');
+                link.setAttribute('aria-expanded', 'false');
+                link.setAttribute('aria-controls', `${issue}-target`);
+                link.textContent = 'V';
 
-            let issueElement = document.createElement("div");
-            issueElement.className = "issue-item";
-            issueElement.innerHTML = `<strong>${issue.replace(/([A-Z])/g, ' $1')}:</strong> ${elements.length} issues found`;
-            elements.forEach((element) =>{
-                const row = document.createElement("div")
-                row.style.display = 'flex'; // Use Flexbox
-                row.style.alignItems = 'center'; // Align items vertically
-                row.style.gap = '10px'; // Add some spacing
-                const checkbox = document.createElement("input")
-                checkbox.type = 'checkbox'
-                const p = document.createElement('p');
-                p.textContent = element
-                row.appendChild(checkbox)
-                row.appendChild(p)
-                issueElement.appendChild(row)
-                //row.appendChild(checkbox)
+                // Create issue element
+                let issueElement = document.createElement('div');
+                issueElement.id = issue;
+                issueElement.className = 'issue-item mt-3';
+                issueElement.innerHTML = `<strong>${issue.replace(/([A-Z])/g, ' $1')}:</strong> ${elements.length} issues found`;
+                issueElement.appendChild(link);
 
-            })
-            sidebarContainer.appendChild(issueElement);
-        }
+                // Create collapsible container
+                let container = document.createElement('div');
+                container.id = `${issue}-target`;
+                container.classList.add('collapse', 'mt-2');
+
+                elements.forEach((element, index) => {
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.gap = '10px';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `${issue}-checkbox-${index}`;
+                    checkbox.checked = true;
+
+                    const image = document.createElement('img');
+                    image.src = "/Assets/Icons/broken_button.svg"
+    
+                    
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', checkbox.id);
+                    label.textContent = element;
+
+                    row.appendChild(checkbox);
+                    row.appendChild(image);
+
+                    row.appendChild(label);
+                    container.appendChild(row);
+                });
+
+                // Append elements to sidebar
+                sidebarContainer.appendChild(issueElement);
+                sidebarContainer.appendChild(container);
+            }
     }
+
+    // Initialize collapsibles
+    // const collapsibles = document.querySelectorAll('.collapse');
+    // if (collapsibles.length > 0) {
+    //     collapsibles.forEach(function (collapseElement) {
+    //         new bootstrap.Collapse(collapseElement);
+    //     });
+    // }
 }
