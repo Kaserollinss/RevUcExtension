@@ -176,6 +176,11 @@ function checkInputLabels() {
     inputs.forEach(function(element, index) {
         const inputId = element.getAttribute('id');
         let hasLabel = false;
+    const inputs = document.querySelectorAll("input");
+
+    inputs.forEach(function(element, index) {
+        const inputId = element.getAttribute('id');
+        let hasLabel = false;
 
         // Check if an input has a corresponding label with a "for" attribute matching its id
         if (inputId && document.querySelectorAll("label[for='" + inputId + "']").length > 0) {
