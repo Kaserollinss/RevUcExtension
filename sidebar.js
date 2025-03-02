@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Function to scroll to a specific element by ID
 function scrollToElement(elementId) {
-const element = document.getElementById(elementId); // Use getElementById for ID lookup
+const element = document.getElementsByClassName(elementId)[0]; // Use getElementById for ID lookup
 if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
 } else {
