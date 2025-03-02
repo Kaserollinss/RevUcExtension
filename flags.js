@@ -724,27 +724,31 @@ function redundantLinkCheck() {
 
 
 async function collectAccessibilityIssues() {
+    console.log("🔹 Collecting accessibility issues...");
+
     const issues = {
-        unclosedTags:  detectUnclosedTagsFromDOM(),
-        emptyLinks:  detectEmptyLinks(),
-        missingHeaders:  detectMissingHeaders(),
-        lowContrastText:  checkTextContrast(),
-        smallText:  checkSmallText(),
-        missingLabels:  checkInputLabels(),
-        missingLangAttributes:  langElementsCheck(),
-        buttonElementAccesible :  buttonElementAccesibleCheck(),
-        buttonElementWhiteSpaceText :  buttonElementWhiteSpaceTextCheck(),
-        buttonElementNullText :  buttonElementNullTextCheck(),
-        buttonElementNoLabel :  buttonElementNoLabelCheck(),
-        buttonElementHiddenText :  buttonElementHiddenTextCheck(),
-        buttonElementEmptyAlt :  buttonElementEmptyAltCheck(),
-        // buttonIssues: await buttonElementCheck(),
-        redundantLinks:  redundantLinkCheck(),
+        unclosedTags: detectUnclosedTagsFromDOM(),
+        emptyLinks: detectEmptyLinks(),
+        missingHeaders: detectMissingHeaders(),
+        lowContrastText: checkTextContrast(),
+        smallText: checkSmallText(),
+        missingLabels: checkInputLabels(),
+        missingLangAttributes: langElementsCheck(),
+        buttonElementAccesible: buttonElementAccesibleCheck(),
+        buttonElementWhiteSpaceText: buttonElementWhiteSpaceTextCheck(),
+        buttonElementNullText: buttonElementNullTextCheck(),
+        buttonElementNoLabel: buttonElementNoLabelCheck(),
+        buttonElementHiddenText: buttonElementHiddenTextCheck(),
+        buttonElementEmptyAlt: buttonElementEmptyAltCheck(),
+        redundantLinks: redundantLinkCheck(),
     };
 
-    console.log("🔹 Accessibility issues collected:", issues);
+    console.log("🔹 Issues detected, waiting for DOM updates...");
 
-    console.log("🔹 Sending accessibility issues to background:", issues);
+    // Wait to ensure DOM updates are complete
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    console.log("✅ Sending accessibility issues to background:", issues);
 
     chrome.runtime.sendMessage(
         { type: "accessibilityIssues", data: issues },
@@ -753,36 +757,51 @@ async function collectAccessibilityIssues() {
                 console.error("❌ Error sending message:", chrome.runtime.lastError);
             } else {
                 console.log("✅ Message sent successfully! Response:", response);
-            } 
+            }
         }
     );
+
+    return issues;
 }
+
+
+
 // Call the function to detect issues and send them
 collectAccessibilityIssues();
 
-async function testGeminiAPI() {
-    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with your actual API key
+
+async function testGeminiAPI(params) {
+    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with actual API key
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    const unclosedTagSize = (detectUnclosedTagsFromDOM()).length;
-    const emptyLinkSize = (detectEmptyLinks()).length;
-    const redundantLinkSize = (redundantLinkCheck()).length;
-    const smallTextSize = (checkSmallText()).length;
-    const inputLabelSize = (checkInputLabels()).length;
-    const langElementsSize = (langElementsCheck()).length;
+
+    // Wait for the issues to be collected before using them
+    // const issues = await collectAccessibilityIssues();
+    const issues = await collectAccessibilityIssues();
+    // Extract issue counts
+    const unclosedTagSize = issues.unclosedTags.length || 0;
+    const emptyLinkSize = issues.emptyLinks.length || 0;
+    const redundantLinkSize = issues.redundantLinks.length || 0;
+    const smallTextSize = issues.smallText.length || 0;
+    const inputLabelSize = issues.missingLabels.length || 0;
+    const langElementsSize = issues.missingLangAttributes.length || 0;
+
     const prompt = `
     Highlight the two biggest accessibility issues on this website, explaining:
     - What they are and why they matter.
     - A quick fix for each.
 
-   Then, briefly list the remaining issues:
+    Then, briefly list the remaining issues:
     - Unclosed tags: ${unclosedTagSize}
     - Empty links: ${emptyLinkSize}
     - Redundant links: ${redundantLinkSize}
     - Small text: ${smallTextSize}
     - Missing input labels: ${inputLabelSize}
     - Missing language elements: ${langElementsSize}
-    Keep it brief and actionable. Please present this summary in a professional and actionable manner.
+    Keep it brief and actionable.
     `;
+
+    console.log(`PROMPT==:>>>>>>>>> ${prompt}`);
+
     const requestBody = {
         contents: [{ parts: [{ text: prompt }] }]
     };
@@ -790,25 +809,23 @@ async function testGeminiAPI() {
     try {
         const response = await fetch(url, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestBody)
         });
 
         const data = await response.json();
-        const rawText = data.candidates[0].content.parts[0].text;
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
         const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
-        const displayText = cleanedText;
-        //Display it in your HTML (assuming there's an element with id "geminiResponse")
-        document.getElementById("aiFixesPage").classList.remove("hidden"); 
+
+        document.getElementById("aiFixesPage").classList.remove("hidden");
         document.getElementById("geminiResponse").innerText = cleanedText;
-        console.log("Cleaned Text:", displayText);
+        console.log("Cleaned Text:", cleanedText);
 
     } catch (error) {
-        console.error("Error testing Gemini API:", error);
+        console.error("❌ Error testing Gemini API:", error);
     }
 }
+
 
 //Run the test function
 document.addEventListener('DOMContentLoaded', () => {
