@@ -24,7 +24,7 @@
         'url',
         'overflowScroll'
     ]);
-        console.log('WebAble Current state:', state);
+        console.log('WebAble: Current state:', state);
 
         // Apply state
         if (state.enabled) {
@@ -74,29 +74,45 @@
     await applyState();
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message?.type === "accessibilityIssues") {
-            console.log("🔹 Received accessibility issues from content script:", message.data);
-            
-            // Forward the data to the sidebar (a different part of the extension)
-            chrome.runtime.sendMessage(
-                { type: "accessibilityIssues", data: message.data },
-                (response) => {
-                    if (chrome.runtime.lastError) {
-                        console.error("❌ Error relaying message to sidebar:", chrome.runtime.lastError);
-                    } else if (response) {
-                        console.log("✅ Message relayed to sidebar successfully!");
-                    } else {
-                        console.warn("⚠️ No response received from sidebar.");
-                    }
-                }
-            );
-    
-            // Send a response back to content script
-            sendResponse({ success: true });
-        } else {
-            sendResponse({ success: false, error: "Unknown request" });
-        }
-        return true; // Required for asynchronous sendResponse
+        (async () => { // await is not allowed on the handler, so we use an async IIFE
+
+            if (message?.method === 'getState') {
+                console.log(message);
+
+                /** @type {State} */
+                let state = await chrome.storage.local.get([
+                    'enabled',
+                    'side',
+                    'url',
+                    'overflowScroll'
+                ]);
+                console.log(state);
+
+                sendResponse(state);
+            } else if (message?.method === 'setState') {
+                console.log(message);
+
+                await chrome.storage.local.set(message.state);
+
+                applyState();
+
+                sendResponse();
+            } else if (message?.method === 'injectIframe') {
+                console.log(message);
+
+                injectIframe(message.iframeId, message.side, message.url, message.overflowScroll);
+
+                sendResponse();
+            } else if (message?.method === 'removeIframe') {
+                console.log(message);
+
+                removeIframe(message.iframeId);
+
+                sendResponse();
+            }
+            // Always sendResponse() for known messages to avoid leaving hanging awaits
+        })();
+        return true; // Required to allow for async sendResponse()
     });
 
     const injectIframe = async (
