@@ -1,3 +1,71 @@
+//TOOLTIP AND ICON INJECTION FUNCTION
+function injectWarningIcon(element, iconPath, explanation, htmlCode) {
+    if (!element) {
+        console.error("❌ injectWarningIcon called with an undefined element!");
+        return;
+    }
+
+    // Create the icon element
+    let warningIcon = document.createElement("img");
+    warningIcon.src = chrome.runtime.getURL(iconPath);
+    warningIcon.alt = "Warning Icon";
+    warningIcon.className = "accessibility-warning-icon";
+
+    // Create tooltip container
+    let tooltip = document.createElement("div");
+    tooltip.className = "accessibility-tooltip";
+
+    // Create explanation section
+    let explanationSection = document.createElement("div");
+    explanationSection.className = "tooltip-explanation";
+    explanationSection.innerText = explanation;
+
+    // Create HTML code section
+    let htmlCodeSection = document.createElement("pre");
+    htmlCodeSection.className = "tooltip-html-code";
+    htmlCodeSection.innerText = htmlCode.trim(); // Display problematic HTML
+
+    // Append sections to tooltip
+    tooltip.appendChild(explanationSection);
+    tooltip.appendChild(htmlCodeSection);
+
+    // Wrap icon inside a span for better styling
+    let iconContainer = document.createElement("span");
+    iconContainer.className = "accessibility-icon-container";
+    iconContainer.appendChild(warningIcon);
+    iconContainer.appendChild(tooltip); // Append tooltip
+
+    // Insert the icon **AFTER** the problematic element
+    element.parentNode.insertBefore(iconContainer, element.nextSibling);
+
+    // Adjust tooltip position after adding to DOM
+    setTimeout(() => adjustTooltipPosition(tooltip), 50);
+}
+
+/**
+ * Adjust tooltip position to prevent it from overflowing off-screen.
+ */
+function adjustTooltipPosition(tooltip) {
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+
+    // Check if tooltip is off-screen to the right
+    if (tooltipRect.right > viewportWidth) {
+        tooltip.style.left = "auto";
+        tooltip.style.right = "0";
+        tooltip.style.transform = "translateX(0)";
+    }
+
+    // Check if tooltip is off-screen to the left
+    if (tooltipRect.left < 0) {
+        tooltip.style.left = "0";
+        tooltip.style.transform = "translateX(0)";
+    }
+}
+
+
+
+
 //ERROR: detect unclosed tags
 function detectUnclosedTagsFromDOM() {
     let detectUnclosedTagsList = [];
@@ -67,9 +135,12 @@ function detectEmptyLinks() {
             detectEmptyLinksList.push(uniqueClass);
             // Create and inject the warning icon
             let warningIcon = document.createElement("img");
-            warningIcon.src = chrome.runtime.getURL("assets/icons/broken_link.svg");
-            warningIcon.alt = "Warning: Broken link";
-            warningIcon.className = "accessibility-warning-icon"; // Add a CSS class for styling
+            // warningIcon.src = chrome.runtime.getURL("assets/icons/broken_link.svg");
+            // warningIcon.alt = "Warning: Broken link";
+            // warningIcon.className = "accessibility-warning-icon"; // Add a CSS class for styling
+
+            injectWarningIcon(link, "assets/icons/broken_link.svg", `Empty Link: Missing href in <a> tag`, `${link.outerHTML}`);
+
             
             // Insert the icon after the empty link
             link.parentNode.insertBefore(warningIcon, link.nextSibling);
@@ -89,7 +160,7 @@ function detectMissingHeaders() {
         console.warn("❌ No header tags (h1-h6) detected on this page.");
 
         // Highlight the body to show the issue
-        document.body.style.border = "2px solid red";
+        document.body.style.border = "2px solid #E79F00";
 
         console.warn("Page highlighted with red border due to missing headers.");
     } else {
@@ -128,21 +199,21 @@ function checkInputLabels() {
             detectMissingLabelsList.push(uniqueClass);
 
             // Add red border
-            $(element).css("border", "2px solid red");
+            $(element).css("border", "2px solid #E79F00");
 
-            // Insert warning icon
-            var warningIcon = $("<img>", {
-                src: chrome.runtime.getURL("assets/icons/missing_label_header.svg"),
-                alt: "Warning: Missing label",
-                class: "accessibility-warning-icon"
-            });
-
-            $(element).after(warningIcon);
+            // Use `injectWarningIcon` instead of manually creating the icon
+            injectWarningIcon(
+                element, 
+                "assets/icons/missing_label_header.svg", 
+                "This input field is missing an associated label, which can make it harder for screen readers to interpret.", 
+                element.outerHTML
+            );
         }
     });
 
     return detectMissingLabelsList;
 }
+
 
 
 //WARNING: Check good text contrast
@@ -228,26 +299,20 @@ function checkTextContrast() {
                             // Ensure red border is visible on inline elements
                             if (element.css("display") === "inline") {
                                 element.css({
-                                    "border-bottom": "2px solid red",
+                                    "border-bottom": "2px solid #E79F00",
                                     "padding-bottom": "2px"
                                 });
                             } else {
-                                element.css("border", "2px solid red");
+                                element.css("border", "2px solid #E79F00");
                             }
 
-                            // Ensure icon is visible
-                            var warningIcon = $("<img>", {
-                                src: chrome.runtime.getURL("assets/icons/low_contrast.svg"),
-                                alt: "Warning: Low contrast",
-                                class: "accessibility-warning-icon"
-                            });
-
-                            // Handle positioning for inline elements
-                            if (element.css("display") === "inline") {
-                                element.after($("<span>").append(warningIcon));
-                            } else {
-                                element.after(warningIcon);
-                            }
+                            // Use `injectWarningIcon()` to add the tooltip and icon
+                            injectWarningIcon(
+                                element[0], 
+                                "assets/icons/low_contrast.svg", 
+                                `This element has a contrast ratio of ${contrastRatio.toFixed(2)}, which is below the recommended 4.5:1 for readability.`,
+                                element[0].outerHTML
+                            );
                         }
                     }
                 }
@@ -259,39 +324,40 @@ function checkTextContrast() {
 }
 
 
+//WARNING: Small text
 function checkSmallText() {
     let detectSmallTextList = [];
+    
     $("*").each(function() {
-        let inlineStyle = $(this).attr("style");
-        if (inlineStyle && inlineStyle.indexOf("font-size") > -1) {
-            let fontSize = parseFloat($(this).css("font-size"));
-            if (fontSize < 16) {
-                console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
+        let element = $(this);
+        let fontSize = parseFloat(element.css("font-size"));
 
-                // Assign a unique class
-                const uniqueClass = `detectSmallText-${detectSmallTextList.length}`;
-                $(this).addClass("detectSmallText").addClass(uniqueClass);
+        if (fontSize < 16) { // Threshold for small text
+            console.warn(`❌ Small text detected in <${this.tagName.toLowerCase()}> element:`, this);
 
-                // Add the new class to the list
-                detectSmallTextList.push(uniqueClass);
+            // Assign a unique class
+            const uniqueClass = `detectSmallText-${detectSmallTextList.length}`;
+            element.addClass("detectSmallText").addClass(uniqueClass);
 
-                // Add red border
-                $(this).css("border", "2px solid red");
+            // Add the new class to the list
+            detectSmallTextList.push(uniqueClass);
 
-                // Add warning icon
-                $(this).after(
-                    $("<img>", {
-                        src: chrome.runtime.getURL("assets/icons/small_text.svg"),
-                        alt: "Warning: Small text",
-                        class: "accessibility-warning-icon"
-                    })
-                );
-            }
+            // Add red border for visual indication
+            element.css("border", "2px solid #E79F00");
+
+            // Use `injectWarningIcon()` to add the tooltip and icon
+            injectWarningIcon(
+                this, 
+                "assets/icons/small_text.svg", 
+                `This text is too small (Font size: ${fontSize}px). Recommended size is 16px or larger for readability.`,
+                this.outerHTML
+            );
         }
     });
 
     return detectSmallTextList;
 }
+
 
 
 //WARNING: Skipped header levels
@@ -444,7 +510,7 @@ function redundantLinkCheck() {
 
         redundantLinks.forEach(link => {
             // Add red border
-            link.style.border = "2px solid red";
+            link.style.border = "2px solid #E79F00";
 
             // Insert warning icon
             let warningIcon = document.createElement("img");

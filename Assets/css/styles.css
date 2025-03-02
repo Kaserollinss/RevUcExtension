@@ -5,3 +5,67 @@
     vertical-align: middle; /* Aligns with text */
     margin-left: 5px; /* Adds spacing from the element */
 }
+/* Tooltip container */
+.accessibility-icon-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Tooltip Base */
+.accessibility-tooltip {
+    visibility: hidden;
+    background-color: white;
+    color: black;
+    text-align: left;
+    padding: 8px;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%; /* Position above icon */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* Ensure Width Expands */
+    min-width: 200px;
+    max-width: 400px;
+    width: auto;
+
+    /* Enable Text Wrapping */
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+    /* Tooltip Border */
+    border: 2px solid black;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Explanation Section */
+.tooltip-explanation {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: black; /* Highlighted text */
+}
+
+/* HTML Code Section */
+.tooltip-html-code {
+    background-color: black;
+    color: white; /* Light red for HTML */
+    font-family: monospace;
+    font-size: 12px;
+    padding: 5px;
+    border-radius: 4px;
+    white-space: pre-wrap; /* Ensures code wraps properly */
+    max-height: 100px;
+    overflow-y: auto; /* Scroll for long HTML */
+}
+
+/* Show tooltip on hover */
+.accessibility-icon-container:hover .accessibility-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
