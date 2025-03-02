@@ -222,26 +222,29 @@ function checkTextContrast() {
 
 // WARNING: Small text
 function checkSmallText() {
-    if (this.style && this.style.fontSize) {
+    $(document).ready(function() {
         $("*").each(function() {
-            let fontSize = parseFloat($(this).css("font-size"));
-            if (fontSize < 16) {
-                console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
+            let inlineStyle = $(this).attr("style");
+            if (inlineStyle && inlineStyle.indexOf("font-size") > -1) {
+                let fontSize = parseFloat($(this).css("font-size"));
+                if (fontSize < 16) {
+                    console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
+
+                    // Add red border
+                    $(this).css("border", "2px solid red");
         
-                // Add red border
-            $(this).css("border", "2px solid red");
-    
-            // Add warning icon
-                var warningIcon = $("<img>", {
-                    src: chrome.runtime.getURL("assets/icons/small_text.svg"),
-                    alt: "Warning: Small text",
-                    class: "accessibility-warning-icon"
-                });
-        
-                $(this).after(warningIcon);
+                    // Add warning icon
+                    var warningIcon = $("<img>", {
+                        src: chrome.runtime.getURL("assets/icons/small_text.svg"),
+                        alt: "Warning: Small text",
+                        class: "accessibility-warning-icon"
+                    });
+            
+                    $(this).after(warningIcon);
                 }
+            }
         });
-    }
+    });
 }
 
 //WARNING: Skipped header levels
