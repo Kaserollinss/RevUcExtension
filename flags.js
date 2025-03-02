@@ -82,172 +82,196 @@ function detectMissingHeaders() {
     }
 }
 
-
 //WARNING: Check for input labels
-$(document).ready(function () {
-    var inputs = $("input"); 
+function checkInputLabels() {
+    $(document).ready(function () {
+        var inputs = $("input"); 
+        
+        inputs.each(function(index, element) {
+            var inputId = $(element).attr('id');
+            var hasLabel = false;
     
-    inputs.each(function(index, element) {
-        var inputId = $(element).attr('id');
-        var hasLabel = false;
-
-        if (inputId && $("label[for='" + inputId + "']").length > 0) {
-            hasLabel = true;
-        }
-
-        if ($(element).closest('label').length > 0) {
-            hasLabel = true;
-        }
-
-        if (!hasLabel) {
-            console.log(`❌ Input ${index} has no corresponding label.`);
-
-            // Add red border
-            $(element).css("border", "2px solid red");
-
-            // Insert warning icon
-            var warningIcon = $("<img>", {
-                src: chrome.runtime.getURL("assets/icons/missing_label_header.svg"),
-                alt: "Warning: Missing label",
-                class: "accessibility-warning-icon"
-            });
-
-            $(element).after(warningIcon);
-        }
+            if (inputId && $("label[for='" + inputId + "']").length > 0) {
+                hasLabel = true;
+            }
+    
+            if ($(element).closest('label').length > 0) {
+                hasLabel = true;
+            }
+    
+            if (!hasLabel) {
+                console.log(`❌ Input ${index} has no corresponding label.`);
+    
+                // Add red border
+                $(element).css("border", "2px solid red");
+    
+                // Insert warning icon
+                var warningIcon = $("<img>", {
+                    src: chrome.runtime.getURL("assets/icons/missing_label_header.svg"),
+                    alt: "Warning: Missing label",
+                    class: "accessibility-warning-icon"
+                });
+    
+                $(element).after(warningIcon);
+            }
+        });
     });
-});
+}
 
 
 
 //WARNING: Check good text contrast
-$(document).ready(function () {
+function checkTextContrast() {
+    $(document).ready(function () {
 
-    // Helper function to calculate luminance of a color
-    function luminance(rgb) {
-        var r = rgb[0] / 255;
-        var g = rgb[1] / 255;
-        var b = rgb[2] / 255;
+        // Helper function to calculate luminance
+        function luminance(rgb) {
+            var r = rgb[0] / 255;
+            var g = rgb[1] / 255;
+            var b = rgb[2] / 255;
 
-        r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-        g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-        b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+            r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+            g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+            b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
 
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    }
-
-    // Helper function to calculate the contrast ratio
-    function calculateContrast(rgb1, rgb2) {
-        var lum1 = luminance(rgb1);
-        var lum2 = luminance(rgb2);
-        var light = Math.max(lum1, lum2);
-        var dark = Math.min(lum1, lum2);
-        return (light + 0.05) / (dark + 0.05);
-    }
-
-    // Convert a color (hex or rgb) to RGB array [r, g, b]
-    function hexToRgb(color) {
-        var result;
-        if (color.startsWith('rgb')) {
-            result = color.match(/(\d+),\s*(\d+),\s*(\d+)/);
-            return result ? [parseInt(result[1]), parseInt(result[2]), parseInt(result[3])] : null;
-        } else if (color.startsWith('#')) {
-            var hex = color.substring(1);
-            if (hex.length === 6) {
-                return [
-                    parseInt(hex.substring(0, 2), 16),
-                    parseInt(hex.substring(2, 4), 16),
-                    parseInt(hex.substring(4, 6), 16)
-                ];
-            }
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
         }
-        return null;
-    }
 
-    // Function to get the computed background color, accounting for inheritance
-    function getEffectiveBackgroundColor(element) {
-        let bgColor;
-        while (element.length && element[0] !== document) { 
-            bgColor = element.css('background-color');
-    
-            if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                return bgColor;
-            }
-    
-            // Move up the DOM tree safely
-            element = element.parent();
-            if (!element.length) break;  // Prevent null reference errors
+        // Helper function to calculate contrast ratio
+        function calculateContrast(rgb1, rgb2) {
+            var lum1 = luminance(rgb1);
+            var lum2 = luminance(rgb2);
+            var light = Math.max(lum1, lum2);
+            var dark = Math.min(lum1, lum2);
+            return (light + 0.05) / (dark + 0.05);
         }
-        return 'rgb(255, 255, 255)'; // Default to white if no background found
-    }
-    
 
-    // Function to check for low contrast
-    function checkContrast() {
-        $("*").each(function () {
-            var element = $(this);
-            var color = element.css('color');
-            var backgroundColor = element.css('background-color');
-    
-            if (color && backgroundColor) {
-                var textColor = hexToRgb(color);
-                var bgColor = hexToRgb(backgroundColor);
-    
-                if (textColor && bgColor) {
-                    var contrastRatio = calculateContrast(textColor, bgColor);
-    
-                    if (contrastRatio < 4.5) {
-                        console.log(`❌ Low contrast detected on ${element[0].tagName}. Ratio: ${contrastRatio.toFixed(2)}`);
-    
-                        // Add red border
-                        element.css("border", "2px solid red");
-    
-                        // Add warning icon
-                        var warningIcon = $("<img>", {
-                            src: chrome.runtime.getURL("assets/icons/low_contrast.svg"),
-                            alt: "Warning: Low contrast",
-                            class: "accessibility-warning-icon"
-                        });
-    
-                        element.after(warningIcon);
+        // Convert a color (hex or rgb) to RGB array [r, g, b]
+        function hexToRgb(color) {
+            if (!color) return null;
+
+            var result;
+            if (color.startsWith('rgb')) {
+                result = color.match(/(\d+),\s*(\d+),\s*(\d+)/);
+                return result ? [parseInt(result[1]), parseInt(result[2]), parseInt(result[3])] : null;
+            } else if (color.startsWith('#')) {
+                var hex = color.substring(1);
+                if (hex.length === 6) {
+                    return [
+                        parseInt(hex.substring(0, 2), 16),
+                        parseInt(hex.substring(2, 4), 16),
+                        parseInt(hex.substring(4, 6), 16)
+                    ];
+                }
+            }
+            return null;
+        }
+
+        // Function to get effective background color (fix for transparency issues)
+        function getEffectiveBackgroundColor(element) {
+            let bgColor;
+            while (element.length && element[0] !== document) { 
+                bgColor = element.css('background-color');
+
+                if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                    return bgColor;
+                }
+
+                element = element.parent();
+                if (!element.length) break; 
+            }
+            return 'rgb(255, 255, 255)'; // Default to white if no background found
+        }
+
+        // Function to check for low contrast
+        function checkContrast() {
+            $("*").each(function () {
+                var element = $(this);
+                var color = element.css('color');
+                var backgroundColor = getEffectiveBackgroundColor(element); // Use inherited background
+
+                if (color && backgroundColor) {
+                    var textColor = hexToRgb(color);
+                    var bgColor = hexToRgb(backgroundColor);
+
+                    if (textColor && bgColor) {
+                        var contrastRatio = calculateContrast(textColor, bgColor);
+
+                        if (contrastRatio < 4.5) {
+                            console.warn(`❌ Low contrast detected on <${element[0].tagName.toLowerCase()}>. Ratio: ${contrastRatio.toFixed(2)}`, element[0]);
+
+                            // Ensure red border is visible on inline elements
+                            if (element.css("display") === "inline") {
+                                element.css({
+                                    "border-bottom": "2px solid red",
+                                    "padding-bottom": "2px"
+                                });
+                            } else {
+                                element.css("border", "2px solid red");
+                            }
+
+                            // Ensure icon is visible
+                            var warningIcon = $("<img>", {
+                                src: chrome.runtime.getURL("assets/icons/low_contrast.svg"),
+                                alt: "Warning: Low contrast",
+                                class: "accessibility-warning-icon"
+                            });
+
+                            // Handle positioning for inline elements
+                            if (element.css("display") === "inline") {
+                                element.after($("<span>").append(warningIcon));
+                            } else {
+                                element.after(warningIcon);
+                            }
+                        }
                     }
+                }
+            });
+        }
+        
+        checkContrast();
+    });
+}
+
+
+// WARNING: Small text
+function checkSmallText() {
+    $(document).ready(function() {
+        $("*").each(function() {
+            let inlineStyle = $(this).attr("style");
+            if (inlineStyle && inlineStyle.indexOf("font-size") > -1) {
+                let fontSize = parseFloat($(this).css("font-size"));
+                if (fontSize < 16) {
+                    console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
+
+                    // Add red border
+                    $(this).css("border", "2px solid red");
+        
+                    // Add warning icon
+                    var warningIcon = $("<img>", {
+                        src: chrome.runtime.getURL("assets/icons/small_text.svg"),
+                        alt: "Warning: Small text",
+                        class: "accessibility-warning-icon"
+                    });
+            
+                    $(this).after(warningIcon);
                 }
             }
         });
-    }    
-    checkContrast();
-});
-
-// WARNING: Small text
-$("*").each(function() {
-    let fontSize = parseFloat($(this).css("font-size"));
-    if (fontSize < 16) {
-        console.log(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
-
-        // Add red border
-        $(this).css("border", "2px solid red");
-
-        // Add warning icon
-        var warningIcon = $("<img>", {
-            src: chrome.runtime.getURL("assets/icons/small_text.svg"),
-            alt: "Warning: Small text",
-            class: "accessibility-warning-icon"
-        });
-
-        $(this).after(warningIcon);
-    }
-});
-
-
+    });
+}
 
 //WARNING: Skipped header levels
-let lastNumber = 0;
-$("h1, h2, h3, h4, h5, h6").each(function() {
-    let currentNumber = parseInt(this.tagName.substring(1));
-    if (lastNumber > 0 && currentNumber > lastNumber + 1) {
-        console.log("Skipped header tag found.", this);
-    }
-    lastNumber = currentNumber;
-})
+function checkSkippedHeaderLevels() {
+    let lastNumber = 0;
+    $("h1, h2, h3, h4, h5, h6").each(function() {
+        let currentNumber = parseInt(this.tagName.substring(1));
+        if (lastNumber > 0 && currentNumber > lastNumber + 1) {
+            console.warn("❌ Skipped header tag found.", this);
+        }
+        lastNumber = currentNumber;
+    })
+}
 
 //WARNING: check for lang attribute
 function langElementsCheck() {
@@ -390,6 +414,10 @@ function redundantLinkCheck() {
 detectUnclosedTagsFromDOM();
 detectEmptyLinks();
 detectMissingHeaders();
+checkTextContrast();
+checkSkippedHeaderLevels();
+checkSmallText();
+checkInputLabels();
 langElementsCheck();
 buttonElementCheck();
 redundantLinkCheck();
