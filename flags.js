@@ -223,7 +223,7 @@ function checkTextContrast() {
                         var contrastRatio = calculateContrast(textColor, bgColor);
 
                         if (contrastRatio < 4.5) {
-                            console.warn(`❌ Low contrast detected on <${element[0].tagName.toLowerCase()}>. Ratio: ${contrastRatio.toFixed(2)}`, element[0]);
+                            //console.warn(`❌ Low contrast detected on <${element[0].tagName.toLowerCase()}>. Ratio: ${contrastRatio.toFixed(2)}`, element[0]);
 
                             // Ensure red border is visible on inline elements
                             if (element.css("display") === "inline") {
@@ -484,15 +484,17 @@ function collectAccessibilityIssues() {
         redundantLinks: redundantLinkCheck(),
     };
 
-    console.log("🔹 Sending accessibility issues to sidebar:", issues);
+    console.log("🔹 Sending accessibility issues to background:", issues);
 
     chrome.runtime.sendMessage(
         { type: "accessibilityIssues", data: issues },
         (response) => {
             if (chrome.runtime.lastError) {
                 console.error("❌ Error sending message:", chrome.runtime.lastError);
-            } else {
+            } else if (response) {
                 console.log("✅ Message sent successfully! Response:", response);
+            } else {
+                console.warn("⚠️ No response received from background.");
             }
         }
     );

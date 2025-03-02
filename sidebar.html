@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accessibility Sidebar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
     <style>
         body {
             margin: 0;
@@ -95,6 +97,14 @@
             padding: 2px;
             font-size: 105%;
             }
+
+        *, ::after, ::before {
+            box-sizing: revert!important; 
+        
+        .card {
+            margin-bottom: 3px!important;
+        }
+}
     </style>
 </head>
 <body>
@@ -115,43 +125,271 @@
         
         <div id="summaryPage" class="content">
             <h3>Summary</h3>
-            <div class="stats">
-                <div class="stat"> <strong>0</strong> Errors </div>
-                <div class="stat"> <strong>0</strong> Contrast Errors </div>
-                <div class="stat"> <strong>3</strong> Alerts </div>
-                <div class="stat"> <strong>15</strong> Features </div>
-                <div class="stat"> <strong>5</strong> Structural Elements </div>
-                <div class="stat"> <strong>2</strong> ARIA </div>
-            </div>
-            <button class="view-details">View details</button> 
+            
             <p>Congratulations! No errors were detected! Manual testing is still necessary to ensure compliance and optimal accessibility.</p>
         </div>
-        <div id="detailsPage" class="content hidden">
-            <h3>Details</h3>
-            <div class="details-section">
-                <h4>⚠️ 3 Alerts</h4>
-                <ul>
-                    <li>No heading structure</li>
-                    <li>No page regions</li>
-                    <li>HTML5 video or audio</li>
-                </ul>
+        <div id="detailsPage" class="content hidden" style="width: 100%; max-width: 500px; margin: 20px auto;">
+            <!-- Unclosed Tags -->
+            <div id="brokenTag" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/broken_tag.svg"></image>
+                    <h4 class="card-title">Unclosed Tags</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>HTML element is missing a closing tag, which can cause rendering issues or unexpected behavior on the page.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Unclosed tags can break the structure of a webpage, causing layout issues and preventing elements from displaying correctly.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Ensure that all HTML tags are properly closed with a matching closing tag.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We scan the HTML document for tags without a corresponding closing tag and flag them for review.</p>
+                    </div>
+                </div>
             </div>
-            <div class="details-section">
-                <h4>✅ 15 Features</h4>
-                <ul>
-                    <li>11 Alternative text</li>
-                    <li>4 Language</li>
-                </ul>
+
+            <!-- <a> ref has missing link -->
+            <div id="brokenLink" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/broken_link.svg"></image>
+
+                    <h4 class="card-title">&lt;a&gt; ref has missing link</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>An anchor (<code>&lt;a&gt;</code>) tag is missing a valid <code>href</code> attribute, making the link non-functional.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Links without valid hrefs are broken, and users may not be able to navigate or access important content.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Ensure all anchor tags have a valid <code>href</code> attribute pointing to the desired destination.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We check all <code>&lt;a&gt;</code> elements for the presence of a valid <code>href</code> attribute.</p>
+                    </div>
+                </div>
             </div>
-            <div class="details-section">
-                <h4>🏭️ 5 Structural Elements</h4>
-                <ul>
-                    <li>1 Data table</li>
-                    <li>3 Table header cells</li>
-                    <li>1 Inline frame</li>
-                </ul>
+
+            <!-- Missing Headers -->
+            <div id="missingHeader" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/broken_tag.svg"></image>
+
+                    <h4 class="card-title">Missing Headers</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>Important content sections are not properly marked with header tags (<code>&lt;h1&gt;</code>, <code>&lt;h2&gt;</code>, etc.), making it harder for users and search engines to understand the structure of the page.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Missing headers can affect the accessibility of your page, as screen readers rely on them to navigate content. It also affects SEO rankings.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Ensure every important section of content is preceded by a proper header tag.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We analyze the structure of the page to identify sections without appropriate headers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missing Input Label -->
+            <div id="missingInputLabel" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/missing_label_header.svg"></image>
+
+                    <h4 class="card-title">Missing Input Label</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>An input element (<code>&lt;input&gt;</code>) is missing a label, which helps screen readers and users understand the purpose of the input field.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Without labels, users with visual impairments or those relying on screen readers may have difficulty using the form fields.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Add a <code>&lt;label&gt;</code> element for every form input, using the <code>for</code> attribute to associate the label with the input field.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We check if each form input has a corresponding <code>&lt;label&gt;</code> element linked via the <code>for</code> attribute.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bad Contrast -->
+            <div id="badContrast" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/low_contrast.svg"></image>
+
+                    <h4 class="card-title">Bad Contrast (Hard to See)</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>The contrast between text and its background is too low, making it difficult for users with visual impairments to read the content.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Low contrast can make content inaccessible to users with visual disabilities or those viewing in poor lighting conditions.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Ensure sufficient contrast between text and background colors, aiming for at least a 4.5:1 ratio for regular text and 3:1 for large text.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We analyze color combinations to check if they meet the WCAG contrast ratio standards.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Small Text -->
+            <div id="smallText" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/small_text.svg"></image>
+
+                    <h4 class="card-title">Small Text</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>Text on the page is too small, making it hard to read for many users, especially those with visual impairments.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Small text can make it difficult for users to read important content, especially on mobile devices or for users with vision problems.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Increase the font size of body text to a minimum of 16px, and use relative units like <code>em</code> for scalability.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We check the font sizes used throughout the page to ensure they meet accessibility standards.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skipped Header Level -->
+            <div id="skippedHeaderLevel" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/broken_tag.svg"></image>
+
+                    <h4 class="card-title">Skipped Header Level</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>Headers on the page skip a level, making the page structure confusing for screen readers and disrupting the logical flow of content.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Skipped header levels can disrupt content navigation, making it harder for users to understand the hierarchy and structure of the page.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Ensure headers follow a logical order, starting from <code>&lt;h1&gt;</code> down to <code>&lt;h6&gt;</code> without skipping levels.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We check the sequence of header elements to ensure they follow a proper hierarchy.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missing Lang Attribute -->
+            <div id="missingLangAttr" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/missing_lang_attr.svg"></image>
+
+                    <h4 class="card-title">Missing Lang Attribute</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>The <code>&lt;html&gt;</code> tag is missing a <code>lang</code> attribute, which helps screen readers and search engines identify the language of the document.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Without a <code>lang</code> attribute, screen readers may mispronounce words, and search engines may have difficulty indexing content properly.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Add the <code>lang</code> attribute to the <code>&lt;html&gt;</code> tag with the correct language code, e.g., <code>&lt;html lang="en"&gt;</code> for English.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We check the <code>&lt;html&gt;</code> element to ensure it has a valid <code>lang</code> attribute.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redundant Link -->
+            <div id="redundantLink" class="card">
+                <div class="card-body">
+                    <image src="Assets/Icons/redundant_link.svg"></image>
+
+                    <h4 class="card-title">Redundant Link</h4>
+
+                    <div class="mt-3">
+                        <h5>What it means</h5>
+                        <p>A link is pointing to the same resource as the current page or leads to an unnecessary redirection.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>Why it matters</h5>
+                        <p>Redundant links waste resources and confuse users, as they do not provide any new or useful content.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How to fix it</h5>
+                        <p>Remove any redundant links or ensure they lead to distinct resources.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <h5>How we determine</h5>
+                        <p>We analyze the links on the page and check if any point to the same URL or lead to unnecessary redirects.</p>
+                    </div>
+                </div>
             </div>
         </div>
+        
         <div id="aiFixesPage" class = "content hidden">
             <h5>error item</h5>
             <code>var sample_error = !error</code>
