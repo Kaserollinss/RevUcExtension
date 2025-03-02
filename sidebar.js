@@ -60,6 +60,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "accessibilityIssues") {
         console.log("✅ Received accessibility issues in sidebar:", message.data);
         displayAccessibilitySummary(message.data);
+
+        // Retrieve and display cleaned text in the geminiResponse div
+        const cleanedText = message.cleanedText || "No cleaned text available.";
+        const geminiResponseDiv = document.getElementById("geminiResponse");
+
+        if (geminiResponseDiv) {
+            geminiResponseDiv.innerText = cleanedText;
+            console.log("📜 Cleaned text displayed in geminiResponse div.");
+        } else {
+            console.error("❌ Couldn't find geminiResponse div.");
+        }
+
         sendResponse({ success: true });  // ✅ Always send a response
         return true;  // ✅ Keep the channel open if needed
     }
@@ -194,3 +206,4 @@ issueElement.appendChild(issueHeader);
     //     });
     // }
 }
+

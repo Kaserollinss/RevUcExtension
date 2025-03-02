@@ -676,7 +676,50 @@ function buttonElementEmptyAltCheck(){
     }
     return buttonElementEmptyAltCheckList;
 }
-
+function showPopup(cleanedText) {
+    // Create the popup container
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100%';
+    popup.style.height = '100%';
+    popup.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    popup.style.display = 'flex';
+    popup.style.justifyContent = 'center';
+    popup.style.alignItems = 'center';
+  
+    // Create the content container
+    const popupContent = document.createElement('div');
+    popupContent.style.backgroundColor = 'white';
+    popupContent.style.padding = '20px';
+    popupContent.style.borderRadius = '5px';
+    popupContent.style.textAlign = 'center';
+    popupContent.style.position = 'relative';
+    popup.appendChild(popupContent);
+  
+    // Create the close button
+    const closeButton = document.createElement('span');
+    closeButton.textContent = '×';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.fontSize = '20px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => {
+      popup.style.display = 'none'; // Close the popup when clicked
+    });
+    popupContent.appendChild(closeButton);
+  
+    // Create the paragraph for the cleaned text
+    const popupText = document.createElement('p');
+    popupText.textContent = cleanedText;
+    popupContent.appendChild(popupText);
+  
+    // Append the popup to the body
+    document.body.appendChild(popup);
+  }
+  
 //WARNING: Redundant link check
 function redundantLinkCheck() {
     let detectRedundantLinksList = [];
@@ -720,7 +763,90 @@ function redundantLinkCheck() {
     return detectRedundantLinksList;
 }
 
+collectAccessibilityIssues();
 
+
+async function testGeminiAPI(params) {
+    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    if (!params) {
+        console.error("⚠️ Params are undefined or null!");
+        return;
+    }
+
+    console.log("📡 Starting Gemini API request...");
+
+    const issues = params;
+    const unclosedTagSize = issues.unclosedTags?.length || 0;
+    const emptyLinkSize = issues.emptyLinks?.length || 0;
+    const redundantLinkSize = issues.redundantLinks?.length || 0;
+    const smallTextSize = issues.smallText?.length || 0;
+    const inputLabelSize = issues.missingLabels?.length || 0;
+    const langElementsSize = issues.missingLangAttributes?.length || 0;
+
+    const prompt = `
+    Highlight the two biggest accessibility issues on this website, explaining:
+    - What they are and why they matter.
+    - A quick fix for each.
+
+    Then, briefly list the following issues:
+    - Unclosed tags: ${unclosedTagSize}
+    - Empty links: ${emptyLinkSize}
+    - Redundant links: ${redundantLinkSize}
+    - Small text: ${smallTextSize}
+    - Missing input labels: ${inputLabelSize}
+    - Missing language elements: ${langElementsSize}
+    Keep it brief and actionable.
+    `;
+
+    console.log("📝 Generated Prompt:", prompt);
+
+    const requestBody = {
+        contents: [{ parts: [{ text: prompt }] }]
+    };
+
+    try {
+        console.log("🚀 Sending request to Gemini API...");
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody)
+        });
+
+        console.log("✅ API response received");
+
+        const data = await response.json();
+        console.log("📩 Raw Response Data:", data);
+
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+        const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
+
+        console.log("📜 Cleaned Text:", cleanedText);
+
+        // Send the data, including the cleanedText, to the background
+        chrome.runtime.sendMessage(
+            { type: "accessibilityIssues", data: issues, cleanedText: cleanedText },
+            (response) => {
+                if (chrome.runtime.lastError) {
+                    console.error("❌ Error sending message:", chrome.runtime.lastError);
+                } else {
+                    console.log("✅ Message sent successfully! Response:", response);
+                }
+            }
+        );
+
+    } catch (error) {
+        console.error("❌ Error testing Gemini API:", error);
+    }
+}
+
+
+// Function to create and show the popup
+
+  // Example usage with cleaned-text
+  //const cleanedText = "This is the cleaned text you want to display.";
+  
 
 
 async function collectAccessibilityIssues() {
@@ -742,6 +868,8 @@ async function collectAccessibilityIssues() {
         buttonElementEmptyAlt: buttonElementEmptyAltCheck(),
         redundantLinks: redundantLinkCheck(),
     };
+
+    testGeminiAPI(issues)
 
     console.log("🔹 Issues detected, waiting for DOM updates...");
 
@@ -765,72 +893,13 @@ async function collectAccessibilityIssues() {
 }
 
 
-
 // Call the function to detect issues and send them
-collectAccessibilityIssues();
-
-
-async function testGeminiAPI(params) {
-    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with actual API key
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    // Wait for the issues to be collected before using them
-    // const issues = await collectAccessibilityIssues();
-    const issues = await collectAccessibilityIssues();
-    // Extract issue counts
-    const unclosedTagSize = issues.unclosedTags.length || 0;
-    const emptyLinkSize = issues.emptyLinks.length || 0;
-    const redundantLinkSize = issues.redundantLinks.length || 0;
-    const smallTextSize = issues.smallText.length || 0;
-    const inputLabelSize = issues.missingLabels.length || 0;
-    const langElementsSize = issues.missingLangAttributes.length || 0;
-
-    const prompt = `
-    Highlight the two biggest accessibility issues on this website, explaining:
-    - What they are and why they matter.
-    - A quick fix for each.
-
-    Then, briefly list the remaining issues:
-    - Unclosed tags: ${unclosedTagSize}
-    - Empty links: ${emptyLinkSize}
-    - Redundant links: ${redundantLinkSize}
-    - Small text: ${smallTextSize}
-    - Missing input labels: ${inputLabelSize}
-    - Missing language elements: ${langElementsSize}
-    Keep it brief and actionable.
-    `;
-
-    console.log(`PROMPT==:>>>>>>>>> ${prompt}`);
-
-    const requestBody = {
-        contents: [{ parts: [{ text: prompt }] }]
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
-        });
-
-        const data = await response.json();
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
-        const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
-
-        document.getElementById("aiFixesPage").classList.remove("hidden");
-        document.getElementById("geminiResponse").innerText = cleanedText;
-        console.log("Cleaned Text:", cleanedText);
-
-    } catch (error) {
-        console.error("❌ Error testing Gemini API:", error);
-    }
-}
 
 
 //Run the test function
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('hiii');
-    document.getElementById('generateReport').addEventListener('click', function(){
-        testGeminiAPI();
-    });
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     console.log('hiii');
+//     document.getElementById('generateReport').addEventListener('click', function(){
+//         testGeminiAPI(collectAccessibilityIssues);
+//     });
+// });
