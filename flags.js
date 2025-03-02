@@ -171,19 +171,19 @@ function detectMissingHeaders() {
 //WARNING: Check for input labels
 function checkInputLabels() {
     let detectMissingLabelsList = [];
-    var inputs = $("input"); 
-    
-    inputs.each(function(index, element) {
-        var inputId = $(element).attr('id');
-        var hasLabel = false;
+    const inputs = document.querySelectorAll("input");
+
+    inputs.forEach(function(element, index) {
+        const inputId = element.getAttribute('id');
+        let hasLabel = false;
 
         // Check if an input has a corresponding label with a "for" attribute matching its id
-        if (inputId && $("label[for='" + inputId + "']").length > 0) {
+        if (inputId && document.querySelectorAll("label[for='" + inputId + "']").length > 0) {
             hasLabel = true;
         }
 
         // Check if the input is wrapped inside a label
-        if ($(element).closest('label').length > 0) {
+        if (element.closest('label')) {
             hasLabel = true;
         }
 
@@ -193,13 +193,13 @@ function checkInputLabels() {
 
             // Assign a unique class
             const uniqueClass = `missingInputLabels-${detectMissingLabelsList.length}`;
-            $(element).addClass('missingInputLabels').addClass(uniqueClass);
+            element.classList.add('missingInputLabels', uniqueClass);
 
             // Add the new class to the list
             detectMissingLabelsList.push(uniqueClass);
 
             // Add red border
-            $(element).css("border", "2px solid #E79F00");
+            element.style.border = "2px solid red";
 
             // Use `injectWarningIcon` instead of manually creating the icon
             injectWarningIcon(
@@ -216,142 +216,139 @@ function checkInputLabels() {
 
 
 
-//WARNING: Check good text contrast
+// WARNING: Check good text contrast
 function checkTextContrast() {
-    $(document).ready(function () {
+    // Helper function to calculate luminance
+    function luminance(rgb) {
+        var r = rgb[0] / 255;
+        var g = rgb[1] / 255;
+        var b = rgb[2] / 255;
 
-        // Helper function to calculate luminance
-        function luminance(rgb) {
-            var r = rgb[0] / 255;
-            var g = rgb[1] / 255;
-            var b = rgb[2] / 255;
+        r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+        g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+        b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
 
-            r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-            g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-            b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
 
-            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        }
+    // Helper function to calculate contrast ratio
+    function calculateContrast(rgb1, rgb2) {
+        var lum1 = luminance(rgb1);
+        var lum2 = luminance(rgb2);
+        var light = Math.max(lum1, lum2);
+        var dark = Math.min(lum1, lum2);
+        return (light + 0.05) / (dark + 0.05);
+    }
 
-        // Helper function to calculate contrast ratio
-        function calculateContrast(rgb1, rgb2) {
-            var lum1 = luminance(rgb1);
-            var lum2 = luminance(rgb2);
-            var light = Math.max(lum1, lum2);
-            var dark = Math.min(lum1, lum2);
-            return (light + 0.05) / (dark + 0.05);
-        }
+    // Convert a color (hex or rgb) to RGB array [r, g, b]
+    function hexToRgb(color) {
+        if (!color) return null;
 
-        // Convert a color (hex or rgb) to RGB array [r, g, b]
-        function hexToRgb(color) {
-            if (!color) return null;
-
-            var result;
-            if (color.startsWith('rgb')) {
-                result = color.match(/(\d+),\s*(\d+),\s*(\d+)/);
-                return result ? [parseInt(result[1]), parseInt(result[2]), parseInt(result[3])] : null;
-            } else if (color.startsWith('#')) {
-                var hex = color.substring(1);
-                if (hex.length === 6) {
-                    return [
-                        parseInt(hex.substring(0, 2), 16),
-                        parseInt(hex.substring(2, 4), 16),
-                        parseInt(hex.substring(4, 6), 16)
-                    ];
-                }
+        var result;
+        if (color.startsWith('rgb')) {
+            result = color.match(/(\d+),\s*(\d+),\s*(\d+)/);
+            return result ? [parseInt(result[1]), parseInt(result[2]), parseInt(result[3])] : null;
+        } else if (color.startsWith('#')) {
+            var hex = color.substring(1);
+            if (hex.length === 6) {
+                return [
+                    parseInt(hex.substring(0, 2), 16),
+                    parseInt(hex.substring(2, 4), 16),
+                    parseInt(hex.substring(4, 6), 16)
+                ];
             }
-            return null;
         }
+        return null;
+    }
 
-        // Function to get effective background color (fix for transparency issues)
-        function getEffectiveBackgroundColor(element) {
-            let bgColor;
-            while (element.length && element[0] !== document) { 
-                bgColor = element.css('background-color');
+    // Function to get effective background color (fix for transparency issues)
+    function getEffectiveBackgroundColor(element) {
+        let bgColor;
+        while (element) {
+            bgColor = window.getComputedStyle(element).getPropertyValue('background-color');
 
-                if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                    return bgColor;
-                }
-
-                element = element.parent();
-                if (!element.length) break; 
+            if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                return bgColor;
             }
-            return 'rgb(255, 255, 255)'; // Default to white if no background found
+
+            element = element.parentElement;
+            if (!element) break;
         }
+        return 'rgb(255, 255, 255)'; // Default to white if no background found
+    }
 
-        // Function to check for low contrast
-        function checkContrast() {
-            $("*").each(function () {
-                var element = $(this);
-                var color = element.css('color');
-                var backgroundColor = getEffectiveBackgroundColor(element); // Use inherited background
+    // Function to check for low contrast
+    function checkContrast() {
+        var allElements = document.querySelectorAll('*');
+        
+        allElements.forEach(function(element) {
+            var color = window.getComputedStyle(element).getPropertyValue('color');
+            var backgroundColor = getEffectiveBackgroundColor(element); // Use inherited background
 
-                if (color && backgroundColor) {
-                    var textColor = hexToRgb(color);
-                    var bgColor = hexToRgb(backgroundColor);
+            if (color && backgroundColor) {
+                var textColor = hexToRgb(color);
+                var bgColor = hexToRgb(backgroundColor);
 
-                    if (textColor && bgColor) {
-                        var contrastRatio = calculateContrast(textColor, bgColor);
+                if (textColor && bgColor) {
+                    var contrastRatio = calculateContrast(textColor, bgColor);
 
-                        if (contrastRatio < 4.5) {
-                            console.warn(`❌ Low contrast detected on <${element[0].tagName.toLowerCase()}>. Ratio: ${contrastRatio.toFixed(2)}`, element[0]);
+                    if (contrastRatio < 4.5) {
+                        console.warn(`❌ Low contrast detected on <${element.tagName.toLowerCase()}>. Ratio: ${contrastRatio.toFixed(2)}`, element);
 
-                            // Ensure red border is visible on inline elements
-                            if (element.css("display") === "inline") {
-                                element.css({
-                                    "border-bottom": "2px solid #E79F00",
-                                    "padding-bottom": "2px"
-                                });
-                            } else {
-                                element.css("border", "2px solid #E79F00");
-                            }
-
-                            // Use `injectWarningIcon()` to add the tooltip and icon
-                            injectWarningIcon(
-                                element[0], 
-                                "assets/icons/low_contrast.svg", 
-                                `This element has a contrast ratio of ${contrastRatio.toFixed(2)}, which is below the recommended 4.5:1 for readability.`,
-                                element[0].outerHTML
-                            );
+                        // Ensure red border is visible on inline elements
+                        if (window.getComputedStyle(element).display === "inline") {
+                            element.style.borderBottom = "2px solid #E79F00";
+                            element.style.paddingBottom = "2px";
+                        } else {
+                            element.style.border = "2px solid #E79F00";
                         }
+
+                        // Use `injectWarningIcon()` to add the tooltip and icon
+                        injectWarningIcon(
+                            element, 
+                            "assets/icons/low_contrast.svg", 
+                            `This element has a contrast ratio of ${contrastRatio.toFixed(2)}, which is below the recommended 4.5:1 for readability.`,
+                            element.outerHTML
+                        );
                     }
                 }
-            });
-        }
-        
-        checkContrast();
-    });
+            }
+        });
+    }
+
+    checkContrast();
 }
 
-
-//WARNING: Small text
 function checkSmallText() {
     let detectSmallTextList = [];
-    
-    $("*").each(function() {
-        let element = $(this);
-        let fontSize = parseFloat(element.css("font-size"));
+    const elements = document.querySelectorAll('*');
 
-        if (fontSize < 16) { // Threshold for small text
-            console.warn(`❌ Small text detected in <${this.tagName.toLowerCase()}> element:`, this);
+    elements.forEach(function(el) {
+        const inlineStyle = el.getAttribute('style');
+        if (inlineStyle && inlineStyle.indexOf("font-size") > -1) {
+            const fontSize = parseFloat(window.getComputedStyle(el).fontSize);
+            if (fontSize < 16) {
+                console.warn(`❌ Font size too small in <${el.tagName.toLowerCase()}> element:`, el);
 
-            // Assign a unique class
-            const uniqueClass = `detectSmallText-${detectSmallTextList.length}`;
-            element.addClass("detectSmallText").addClass(uniqueClass);
+                // Assign a unique class
+                const uniqueClass = `detectSmallText-${detectSmallTextList.length}`;
+                el.classList.add("detectSmallText");
+                el.classList.add(uniqueClass);
 
-            // Add the new class to the list
-            detectSmallTextList.push(uniqueClass);
+                // Add the new class to the list
+                detectSmallTextList.push(uniqueClass);
 
-            // Add red border for visual indication
-            element.css("border", "2px solid #E79F00");
+                // Add red border
+                el.style.border = "2px solid red";
 
-            // Use `injectWarningIcon()` to add the tooltip and icon
-            injectWarningIcon(
-                this, 
-                "assets/icons/small_text.svg", 
-                `This text is too small (Font size: ${fontSize}px). Recommended size is 16px or larger for readability.`,
-                this.outerHTML
-            );
+                // Use `injectWarningIcon()` to add the tooltip and icon
+                injectWarningIcon(
+                    this, 
+                    "assets/icons/small_text.svg", 
+                    `This text is too small (Font size: ${fontSize}px). Recommended size is 16px or larger for readability.`,
+                    this.outerHTML
+                );
+            }
         }
     });
 
@@ -566,3 +563,61 @@ function collectAccessibilityIssues() {
 
 // Call the function to detect issues and send them
 collectAccessibilityIssues();
+
+async function testGeminiAPI() {
+    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with your actual API key
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const unclosedTagSize = (detectUnclosedTagsFromDOM()).length;
+    const emptyLinkSize = (detectEmptyLinks()).length;
+    const redundantLinkSize = (redundantLinkCheck()).length;
+    const smallTextSize = (checkSmallText()).length;
+    const inputLabelSize = (checkInputLabels()).length;
+    const langElementsSize = (langElementsCheck()).length;
+    const prompt = `
+        Based on the following data, please provide a detailed summary for the user. The summary should include:
+
+        1. An explanation of each error found on the website, describing what each error means.
+        2. An explanation of why these errors are important, particularly from an accessibility perspective.
+        3. Suggestions on how to resolve these issues, along with recommendations to improve website accessibility and reduce potential accessibility issues.
+
+        Here is the data:
+        - Unclosed tags: ${unclosedTagSize}
+        - Empty links: ${emptyLinkSize}
+        - Redundant links: ${redundantLinkSize}
+        - Small text elements: ${smallTextSize}
+        - Missing input labels: ${inputLabelSize}
+        - Language elements: ${langElementsSize}
+    `;
+    const requestBody = {
+        contents: [{ parts: [{ text: prompt }] }]
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+        const rawText = data.candidates[0].content.parts[0].text;
+        const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
+        const displayText = cleanedText;
+        // Display it in your HTML (assuming there's an element with id "geminiResponse")
+        //document.getElementById("geminiResponse").innerText = displayText;
+        console.log("Cleaned Text:", displayText);
+
+    } catch (error) {
+        console.error("Error testing Gemini API:", error);
+    }
+}
+
+// Run the test function
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('hiii');
+    document.getElementById('generateReport').addEventListener('click', function(){
+        testGeminiAPI();
+    });
+});
