@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Sidebar</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .hidden{
+            display: none;
+        }
+        .sidebar {
+            width: 350px;
+            height: 100vh;
+            background: #f0f2f5;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .toggle {
+            display: flex;
+            align-items: center;
+        }
+        .toggle input {
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .tabs button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .tabs button.active {
+            font-weight: bold;
+            border-bottom: 2px solid #007bff;
+        }
+        .content {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .stat {
+            width: 45%;
+            text-align: center;
+        }
+        .view-details {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+
+        code {
+            font-family: Consolas,"courier new";
+            color: crimson;
+            background-color: #f1f1f1;
+            padding: 2px;
+            font-size: 105%;
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="header">
+            <span class="logo">WebAble</span>
+            <span class="toggle">Styles: OFF <input type="checkbox"></span>
+        </div>
+        <div class="tabs">
+            <button class="active" onclick="switchTab(event, 'summaryPage')">Summary</button>
+            <button onclick="switchTab(event, 'detailsPage')">Details</button>
+            <button onclick="switchTab(event, 'aiFixesPage')">Ai Fixes</button>
+        </div>
+        <div id="summaryPage" class="content">
+            <h3>Summary</h3>
+            <div class="stats">
+                <div class="stat"> <strong>0</strong> Errors </div>
+                <div class="stat"> <strong>0</strong> Contrast Errors </div>
+                <div class="stat"> <strong>3</strong> Alerts </div>
+                <div class="stat"> <strong>15</strong> Features </div>
+                <div class="stat"> <strong>5</strong> Structural Elements </div>
+                <div class="stat"> <strong>2</strong> ARIA </div>
+            </div>
+            <button onclick="switchTab(event, 'detailsPage')" class="view-details">View details</button> 
+            <p>Congratulations! No errors were detected! Manual testing is still necessary to ensure compliance and optimal accessibility.</p>
+        </div>
+        <div id="detailsPage" class="content hidden">
+            <h3>Details</h3>
+            <div class="details-section">
+                <h4>⚠️ 3 Alerts</h4>
+                <ul>
+                    <li>No heading structure</li>
+                    <li>No page regions</li>
+                    <li>HTML5 video or audio</li>
+                </ul>
+            </div>
+            <div class="details-section">
+                <h4>✅ 15 Features</h4>
+                <ul>
+                    <li>11 Alternative text</li>
+                    <li>4 Language</li>
+                </ul>
+            </div>
+            <div class="details-section">
+                <h4>🏭️ 5 Structural Elements</h4>
+                <ul>
+                    <li>1 Data table</li>
+                    <li>3 Table header cells</li>
+                    <li>1 Inline frame</li>
+                </ul>
+            </div>
+        </div>
+        <div id="aiFixesPage" class = "content hidden">
+            <h5>error item</h5>
+            <code>var sample_error = !error</code>
+        </div>
+        
+    </div>
+</body>
+
+<script>
+    function switchTab(event, pageId) {
+        // Hide all content sections
+        document.querySelectorAll('.content').forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.tabs button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Show the selected page
+        document.getElementById(pageId).classList.remove('hidden');
+
+        // Set the clicked tab as active
+        event.target.classList.add('active');
+    }
+</script>
+
+</html>
