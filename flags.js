@@ -417,74 +417,74 @@ function langElementsCheck() {
 }
 
 //ERROR: Button check
-async function buttonElementCheck() {
-    const buttons = document.querySelectorAll('button');
+// async function buttonElementCheck() {
+//     const buttons = document.querySelectorAll('button');
 
-    if (buttons.length === 0) {
-        console.log('✅ No buttons found on the page.');
-        return;
-    }
+//     if (buttons.length === 0) {
+//         console.log('✅ No buttons found on the page.');
+//         return;
+//     }
 
-    buttons.forEach(button => {
-        const buttonText = button.textContent.trim();
-        const ariaLabel = button.getAttribute('aria-label');
-        const title = button.getAttribute('title');
-        const hasIcon = button.querySelector('img, svg') !== null;
-        const style = window.getComputedStyle(button);
-        const isHidden = style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0 || parseFloat(style.height) === 0 || parseFloat(style.width) === 0;
-        const img = button.querySelector('img');
+//     buttons.forEach(button => {
+//         const buttonText = button.textContent.trim();
+//         const ariaLabel = button.getAttribute('aria-label');
+//         const title = button.getAttribute('title');
+//         const hasIcon = button.querySelector('img, svg') !== null;
+//         const style = window.getComputedStyle(button);
+//         const isHidden = style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0 || parseFloat(style.height) === 0 || parseFloat(style.width) === 0;
+//         const img = button.querySelector('img');
 
-        let isProblematic = false;
-        let issues = [];
+//         let isProblematic = false;
+//         let issues = [];
 
-        // Check for missing accessible labels
-        if (!ariaLabel && !title) {
-            issues.push('No accessible label');
-            isProblematic = true;
-        }
+//         // Check for missing accessible labels
+//         if (!ariaLabel && !title) {
+//             issues.push('No accessible label');
+//             isProblematic = true;
+//         }
 
-        // Check for whitespace-only or missing text
-        if (buttonText === '') {
-            issues.push('Only whitespace or no text');
-            isProblematic = true;
-        }
+//         // Check for whitespace-only or missing text
+//         if (buttonText === '') {
+//             issues.push('Only whitespace or no text');
+//             isProblematic = true;
+//         }
 
-        // Check for button with only an icon but no label
-        if (hasIcon && buttonText === '' && !ariaLabel && !title) {
-            issues.push('Only an icon, no label');
-            isProblematic = true;
-        }
+//         // Check for button with only an icon but no label
+//         if (hasIcon && buttonText === '' && !ariaLabel && !title) {
+//             issues.push('Only an icon, no label');
+//             isProblematic = true;
+//         }
 
-        // Check for hidden or visually-invisible text
-        if (isHidden) {
-            issues.push('Hidden or visually-invisible text');
-            isProblematic = true;
-        }
+//         // Check for hidden or visually-invisible text
+//         if (isHidden) {
+//             issues.push('Hidden or visually-invisible text');
+//             isProblematic = true;
+//         }
 
-        // Check for images without alternative text
-        if (img) {
-            const altText = img.getAttribute('alt');
-            if (!altText) {
-                issues.push('Image in button has no alternative text');
-                isProblematic = true;
-            }
-        }
+//         // Check for images without alternative text
+//         if (img) {
+//             const altText = img.getAttribute('alt');
+//             if (!altText) {
+//                 issues.push('Image in button has no alternative text');
+//                 isProblematic = true;
+//             }
+//         }
 
-        // Log issues and inject warning icon if necessary
-        if (isProblematic) {
-            console.warn(`❌ Button issue(s): ${issues.join(', ')}`, button);
-            button.style.border = "2px solid red";
-            // Inject warning icon
-            let warningIcon = document.createElement("img");
-            warningIcon.src = chrome.runtime.getURL("assets/icons/broken_button.svg");
-            warningIcon.alt = "Warning: Inaccessible button";
-            warningIcon.className = "accessibility-warning-icon"; // Add a CSS class for styling
+//         // Log issues and inject warning icon if necessary
+//         if (isProblematic) {
+//             console.warn(`❌ Button issue(s): ${issues.join(', ')}`, button);
+//             button.style.border = "2px solid red";
+//             // Inject warning icon
+//             let warningIcon = document.createElement("img");
+//             warningIcon.src = chrome.runtime.getURL("assets/icons/broken_button.svg");
+//             warningIcon.alt = "Warning: Inaccessible button";
+//             warningIcon.className = "accessibility-warning-icon"; // Add a CSS class for styling
 
-            // Insert the icon after the problematic button
-            button.parentNode.insertBefore(warningIcon, button.nextSibling);
-        }
-    });
-}
+//             // Insert the icon after the problematic button
+//             button.parentNode.insertBefore(warningIcon, button.nextSibling);
+//         }
+//     });
+// }
 
 //ERROR : Button Check - no aria label
 function buttonElementAccesibleCheck(){
