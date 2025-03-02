@@ -1,5 +1,6 @@
 //ERROR: detect unclosed tags
 function detectUnclosedTagsFromDOM() {
+    let detectUnclosedTagsList = [];
     const elements = document.body.getElementsByTagName("*");
     const unclosedTags = [];
 
@@ -9,7 +10,12 @@ function detectUnclosedTagsFromDOM() {
 
         if (!isSelfClosing && el.outerHTML.indexOf(`</${tagName}>`) === -1) {
             unclosedTags.push(el);
-
+            // Assign a unique class
+            const uniqueClass = `missingClosingTag-${detectUnclosedTagsList?.length || 0}`;
+            el.classList.add('missingClosingTag');
+            el.classList.add(uniqueClass);
+            // Add the new class to the list
+            detectUnclosedTagsList.push(uniqueClass);
             // Add red border
             el.style.border = "2px solid red";
 
@@ -28,12 +34,14 @@ function detectUnclosedTagsFromDOM() {
     } else {
         console.log("✅ No missing closing tags detected.");
     }
+    return detectUnclosedTagsList;
 }
 
 
 
 //ERROR: detect empty links
 function detectEmptyLinks() {
+    let detectEmptyLinksList = [];
     console.log("empty link EXECUTED");
     const links = document.querySelectorAll("a"); // Get all <a> elements
     const emptyLinks = [];
@@ -51,6 +59,12 @@ function detectEmptyLinks() {
             link.style.border = "2px solid red"; // Highlight them on the page
             console.log(`Missing href in <a> tag #${index + 1}:`, link.outerHTML);
             
+            // Assign a unique class
+            const uniqueClass = `detectEmptyLinks-${detectEmptyLinksList?.length || 0}`;
+            link.classList.add('detectEmptyLinks');
+            link.classList.add(uniqueClass);
+            // Add the new class to the list
+            detectEmptyLinksList.push(uniqueClass);
             // Create and inject the warning icon
             let warningIcon = document.createElement("img");
             warningIcon.src = chrome.runtime.getURL("assets/icons/broken_link.svg");
@@ -63,6 +77,7 @@ function detectEmptyLinks() {
     } else {
         console.log("✅ All <a> tags have valid href attributes.");
     }
+    return detectEmptyLinksList;
 }
 
 
@@ -84,40 +99,50 @@ function detectMissingHeaders() {
 
 //WARNING: Check for input labels
 function checkInputLabels() {
-    $(document).ready(function () {
-        var inputs = $("input"); 
-        
-        inputs.each(function(index, element) {
-            var inputId = $(element).attr('id');
-            var hasLabel = false;
+    let detectMissingLabelsList = [];
+    var inputs = $("input"); 
     
-            if (inputId && $("label[for='" + inputId + "']").length > 0) {
-                hasLabel = true;
-            }
-    
-            if ($(element).closest('label').length > 0) {
-                hasLabel = true;
-            }
-    
-            if (!hasLabel) {
-                console.log(`❌ Input ${index} has no corresponding label.`);
-    
-                // Add red border
-                $(element).css("border", "2px solid red");
-    
-                // Insert warning icon
-                var warningIcon = $("<img>", {
-                    src: chrome.runtime.getURL("assets/icons/missing_label_header.svg"),
-                    alt: "Warning: Missing label",
-                    class: "accessibility-warning-icon"
-                });
-    
-                $(element).after(warningIcon);
-            }
-        });
-    });
-}
+    inputs.each(function(index, element) {
+        var inputId = $(element).attr('id');
+        var hasLabel = false;
 
+        // Check if an input has a corresponding label with a "for" attribute matching its id
+        if (inputId && $("label[for='" + inputId + "']").length > 0) {
+            hasLabel = true;
+        }
+
+        // Check if the input is wrapped inside a label
+        if ($(element).closest('label').length > 0) {
+            hasLabel = true;
+        }
+
+        // If no label is found, process the input element
+        if (!hasLabel) {
+            console.log(`❌ Input ${index} has no corresponding label.`);
+
+            // Assign a unique class
+            const uniqueClass = `missingInputLabels-${detectMissingLabelsList.length}`;
+            $(element).addClass('missingInputLabels').addClass(uniqueClass);
+
+            // Add the new class to the list
+            detectMissingLabelsList.push(uniqueClass);
+
+            // Add red border
+            $(element).css("border", "2px solid red");
+
+            // Insert warning icon
+            var warningIcon = $("<img>", {
+                src: chrome.runtime.getURL("assets/icons/missing_label_header.svg"),
+                alt: "Warning: Missing label",
+                class: "accessibility-warning-icon"
+            });
+
+            $(element).after(warningIcon);
+        }
+    });
+
+    return detectMissingLabelsList;
+}
 
 
 //WARNING: Check good text contrast
@@ -234,32 +259,40 @@ function checkTextContrast() {
 }
 
 
-// WARNING: Small text
 function checkSmallText() {
-    $(document).ready(function() {
-        $("*").each(function() {
-            let inlineStyle = $(this).attr("style");
-            if (inlineStyle && inlineStyle.indexOf("font-size") > -1) {
-                let fontSize = parseFloat($(this).css("font-size"));
-                if (fontSize < 16) {
-                    console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
+    let detectSmallTextList = [];
+    $("*").each(function() {
+        let inlineStyle = $(this).attr("style");
+        if (inlineStyle && inlineStyle.indexOf("font-size") > -1) {
+            let fontSize = parseFloat($(this).css("font-size"));
+            if (fontSize < 16) {
+                console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
 
-                    // Add red border
-                    $(this).css("border", "2px solid red");
-        
-                    // Add warning icon
-                    var warningIcon = $("<img>", {
+                // Assign a unique class
+                const uniqueClass = `detectSmallText-${detectSmallTextList.length}`;
+                $(this).addClass("detectSmallText").addClass(uniqueClass);
+
+                // Add the new class to the list
+                detectSmallTextList.push(uniqueClass);
+
+                // Add red border
+                $(this).css("border", "2px solid red");
+
+                // Add warning icon
+                $(this).after(
+                    $("<img>", {
                         src: chrome.runtime.getURL("assets/icons/small_text.svg"),
                         alt: "Warning: Small text",
                         class: "accessibility-warning-icon"
-                    });
-            
-                    $(this).after(warningIcon);
-                }
+                    })
+                );
             }
-        });
+        }
     });
+
+    return detectSmallTextList;
 }
+
 
 //WARNING: Skipped header levels
 function checkSkippedHeaderLevels() {
@@ -275,6 +308,7 @@ function checkSkippedHeaderLevels() {
 
 //WARNING: check for lang attribute
 function langElementsCheck() {
+    let detectMissingLangAttributeList = [];
     const langElements = document.querySelectorAll('[lang]');
     console.log(langElements);
 
@@ -293,6 +327,12 @@ function langElementsCheck() {
     } else {
         langElements.forEach(element => {
             const langValue = element.getAttribute('lang'); // Get lang attribute value
+            // Assign a unique class
+            const uniqueClass = `detectMissingLangAttribute-${detectMissingLangAttributeList?.length || 0}`;
+            element.classList.add('detectMissingLangAttribute');
+            element.classList.add(uniqueClass);
+            // Add the new class to the list
+            detectMissingLangAttributeList.push(uniqueClass);
 
             // Check if lang element is null or empty
             if (langValue === null || langValue.trim() === "") {
@@ -302,6 +342,7 @@ function langElementsCheck() {
             }
         });
     }
+    return detectMissingLangAttributeList;
 }
 
 //ERROR: Button check
@@ -377,6 +418,7 @@ function buttonElementCheck() {
 
 //WARNING: Redundant link check
 function redundantLinkCheck() {
+    let detectRedundantLinksList = [];
     const links = document.querySelectorAll('a');  
     const hrefs = new Set();  
     const redundantLinks = [];  
@@ -385,6 +427,12 @@ function redundantLinkCheck() {
         const href = link.getAttribute('href');
 
         if (href && hrefs.has(href)) {
+            // Assign a unique class
+            const uniqueClass = `detectRedundantLinks-${detectRedundantLinksList?.length || 0}`;
+            link.classList.add('detectRedundantLinks');
+            link.classList.add(uniqueClass);
+            // Add the new class to the list
+            detectRedundantLinksList.push(uniqueClass);
             redundantLinks.push(link);
         } else {
             hrefs.add(href);
@@ -407,6 +455,7 @@ function redundantLinkCheck() {
             link.parentNode.insertBefore(warningIcon, link.nextSibling);
         });
     }
+    return detectRedundantLinksList;
 }
 
 
