@@ -55,20 +55,43 @@ function injectWarningIcon(element, iconPath, explanation, htmlCode) {
 function adjustTooltipPosition(tooltip) {
     const tooltipRect = tooltip.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-    // Check if tooltip is off-screen to the right
+    // Ensure tooltip styles remain intact
+    tooltip.style.border = "2px solid black"; // Restore border
+    tooltip.style.backgroundColor = "#ffffff";  // Ensure background remains dark
+    tooltip.style.color = "#000000";            // Ensure text remains visible
+    tooltip.style.padding = "5px";           // Prevent content from touching borders
+    tooltip.style.borderRadius = "5px";      // Smooth edges
+    tooltip.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)"; // Prevent flat design
+
+    // Adjust tooltip position if off-screen to the right
     if (tooltipRect.right > viewportWidth) {
         tooltip.style.left = "auto";
         tooltip.style.right = "0";
         tooltip.style.transform = "translateX(0)";
     }
 
-    // Check if tooltip is off-screen to the left
+    // Adjust tooltip position if off-screen to the left
     if (tooltipRect.left < 0) {
         tooltip.style.left = "0";
         tooltip.style.transform = "translateX(0)";
     }
+
+    // Adjust tooltip position if off-screen at the top
+    if (tooltipRect.top < 0) {
+        tooltip.style.top = "5px"; // Prevent it from going off the top of the screen
+        tooltip.style.bottom = "auto";
+        tooltip.style.transform = "translateY(0)";
+    }
+
+    // Adjust tooltip position if off-screen at the bottom
+    if (tooltipRect.bottom > viewportHeight) {
+        tooltip.style.top = "auto";
+        tooltip.style.bottom = "5px"; // Prevent it from going off the bottom of the screen
+    }
 }
+
 
 
 
@@ -380,12 +403,47 @@ function checkSkippedHeaderLevels() {
 //WARNING: check for lang attribute
 function langElementsCheck() {
     let detectMissingLangAttributeList = [];
-    const langElements = document.querySelectorAll('[lang]');
-    console.log(langElements);
+    const htmlElement = document.documentElement; // Get <html> element
+    const langAttribute = htmlElement.getAttribute('lang');
 
-    // Check if the page has no elements with a 'lang' attribute
-    if (langElements.length === 0) {
-        console.log("❌ No elements with a 'lang' attribute found.");
+    // Function to create and append a tooltip
+    function createTooltip(targetElement, message) {
+        let tooltip = document.createElement("div");
+        tooltip.className = "manual-tooltip";
+        tooltip.innerText = message;
+
+        // Style the tooltip
+        tooltip.style.position = "absolute";
+        tooltip.style.backgroundColor = "black";
+        tooltip.style.color = "white";
+        tooltip.style.padding = "5px";
+        tooltip.style.borderRadius = "5px";
+        tooltip.style.fontSize = "12px";
+        tooltip.style.whiteSpace = "nowrap";
+        tooltip.style.zIndex = "9999";
+        tooltip.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.5)";
+        tooltip.style.display = "none"; // Initially hidden
+
+        document.body.appendChild(tooltip);
+
+        // Position tooltip near the target element on hover
+        targetElement.addEventListener("mouseenter", () => {
+            let rect = targetElement.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + window.scrollX}px`;
+            tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+            tooltip.style.display = "block"; // Show tooltip
+        });
+
+        targetElement.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none"; // Hide tooltip
+        });
+
+        return tooltip;
+    }
+
+    // If no lang attribute exists at all
+    if (!langAttribute) {
+        console.log("❌ No 'lang' attribute found on the <html> element.");
 
         // Inject warning icon at the top of the page
         let warningIcon = document.createElement("img");
@@ -395,26 +453,30 @@ function langElementsCheck() {
 
         // Insert the warning icon at the beginning of the body
         document.body.insertBefore(warningIcon, document.body.firstChild);
-    } else {
-        langElements.forEach(element => {
-            const langValue = element.getAttribute('lang'); // Get lang attribute value
-            // Assign a unique class
-            const uniqueClass = `detectMissingLangAttribute-${detectMissingLangAttributeList?.length || 0}`;
-            element.classList.add('detectMissingLangAttribute');
-            element.classList.add(uniqueClass);
-            // Add the new class to the list
-            detectMissingLangAttributeList.push(uniqueClass);
 
-            // Check if lang element is null or empty
-            if (langValue === null || langValue.trim() === "") {
-                console.log("❌ Element found, but 'lang' attribute is null or empty:", element);
-            } else {
-                console.log("✅ Valid 'lang' attribute found:", langValue, element);
-            }
-        });
+        // Add tooltip manually (hidden by default, shown on hover)
+        createTooltip(warningIcon, "No 'lang' attribute found. A valid language declaration is required.");
+    } else if (langAttribute.trim() === "") {
+        console.log("❌ 'lang' attribute is present but empty:", htmlElement);
+
+        // Inject warning icon next to <html> tag
+        let warningIcon = document.createElement("img");
+        warningIcon.src = chrome.runtime.getURL("assets/icons/missing_lang_attr.svg");
+        warningIcon.alt = "Warning: Empty lang attribute";
+        warningIcon.className = "accessibility-warning-icon";
+
+        htmlElement.insertBefore(warningIcon, htmlElement.firstChild);
+
+        // Add tooltip manually (hidden by default, shown on hover)
+        createTooltip(warningIcon, "The 'lang' attribute is empty. A valid language declaration is required.");
+    } else {
+        console.log("✅ Valid 'lang' attribute found:", langAttribute);
     }
+
     return detectMissingLangAttributeList;
 }
+
+
 
 
 //ERROR : Button Check - no aria label
