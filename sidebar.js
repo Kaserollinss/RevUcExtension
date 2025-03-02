@@ -81,15 +81,15 @@ function displayAccessibilitySummary(data) {
         missingHeaders: "Missing Header Tags",
         lowContrastText: "Low Contrast Text",
         smallText: "Text Too Small",
-        missingLabels: "Inputs Without Labels",
+        missingLabels: "Inputs Missing Labels",
         missingLangAttributes: "Missing Language Attribute",
-        buttonElementAccesible: "Buttons Without Labels",
-        buttonElementWhiteSpaceText: "Buttons With Only Whitespace",
-        buttonElementNullText: "Buttons Without Text",
-        buttonElementNoLabel: "Buttons With Only Icons",
-        buttonElementHiddenText: "Buttons With Hidden Text",
-        buttonElementEmptyAlt: "Buttons With Missing Alt Text",
-        redundantLinks: "Redundant Links (Same URL Repeated)",
+        buttonElementAccesible: "Buttons: Missing Labels",
+        buttonElementWhiteSpaceText: "Buttons: Only Whitespace",
+        buttonElementNullText: "Buttons: No Text",
+        buttonElementNoLabel: "Buttons: Only Icons",
+        buttonElementHiddenText: "Buttons: Hidden Text",
+        buttonElementEmptyAlt: "Buttons: Missing Alt Text",
+        redundantLinks: "Redundant Links",
     };
 
     // Iterate over the issues and display them
@@ -99,31 +99,46 @@ function displayAccessibilitySummary(data) {
                 
             
             // Summary Page
-                // Create collapse toggle button
-                const link = document.createElement('a');
-                link.classList.add('float-end');
-                link.setAttribute('data-bs-toggle', 'collapse');
-                link.setAttribute('href', `#${issue}-target`);
-                link.setAttribute('role', 'button');
-                link.setAttribute('aria-expanded', 'false');
-                link.setAttribute('aria-controls', `${issue}-target`);
-                const dropdownIcon = document.createElement('img');
-                dropdownIcon.src = "Assets/Icons/dropdown.svg";  // Ensure this path is correct
-                dropdownIcon.alt = "Dropdown";  // Accessibility improvement
-                dropdownIcon.style.width = "16px";  // Adjust the size as needed
-                dropdownIcon.style.height = "16px";
-
-                link.appendChild(dropdownIcon);
-
-
                 // Create issue element
-                let issueElement = document.createElement('div');
-                issueElement.id = issue;
-                issueElement.className = 'issue-item mt-3';
-                const issueTitle = issueNames[issue] || issue.replace(/([A-Z])/g, ' $1'); // Default fallback
-                issueElement.innerHTML = `<strong>${issueTitle}:</strong> ${elements.length} issues found`;
+let issueElement = document.createElement('div');
+issueElement.id = issue;
+issueElement.className = 'issue-item mt-3';
 
-                issueElement.appendChild(link);
+// Create flex container for title + dropdown icon
+let issueHeader = document.createElement('div');
+issueHeader.style.display = "flex";
+issueHeader.style.justifyContent = "space-between"; // Ensures text is left, icon is right
+issueHeader.style.alignItems = "center"; // Align vertically
+
+const issueTitle = issueNames[issue] || issue.replace(/([A-Z])/g, ' $1'); // Default fallback
+let issueText = document.createElement('strong');
+issueText.innerText = `${issueTitle}: ${elements.length} issues found`;
+
+// Create dropdown link
+const link = document.createElement('a');
+link.setAttribute('data-bs-toggle', 'collapse');
+link.setAttribute('href', `#${issue}-target`);
+link.setAttribute('role', 'button');
+link.setAttribute('aria-expanded', 'false');
+link.setAttribute('aria-controls', `${issue}-target`);
+
+// Create dropdown icon
+const dropdownIcon = document.createElement('img');
+dropdownIcon.src = "Assets/Icons/dropdown.svg";  // Ensure path is correct
+dropdownIcon.alt = "Dropdown";
+dropdownIcon.style.width = "16px";
+dropdownIcon.style.height = "16px";
+dropdownIcon.style.cursor = "pointer"; // Ensure it's clickable
+dropdownIcon.style.marginLeft = "auto"; // Pushes it to the right in flexbox
+
+// Append icon to link and add link to flex container
+link.appendChild(dropdownIcon);
+issueHeader.appendChild(issueText);
+issueHeader.appendChild(link);
+
+// Append header to issue element
+issueElement.appendChild(issueHeader);
+
 
                 // Create collapsible container
                 let container = document.createElement('div');
