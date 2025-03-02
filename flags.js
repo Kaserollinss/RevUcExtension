@@ -720,35 +720,29 @@ function redundantLinkCheck() {
     return detectRedundantLinksList;
 }
 
+
+
+
 async function collectAccessibilityIssues() {
     const issues = {
-        unclosedTags: await detectUnclosedTagsFromDOM(),
-        emptyLinks: await detectEmptyLinks(),
-        missingHeaders: await detectMissingHeaders(),
-        lowContrastText: await checkTextContrast(),
-        smallText: await checkSmallText(),
-        missingLabels: await checkInputLabels(),
-        missingLangAttributes: await langElementsCheck(),
-        buttonElementAccesible : await buttonElementAccesibleCheck(),
-        buttonElementWhiteSpaceText : await buttonElementWhiteSpaceTextCheck(),
-        buttonElementNullText : await buttonElementNullTextCheck(),
-        buttonElementNoLabel : await buttonElementNoLabelCheck(),
-        buttonElementHiddenText : await buttonElementHiddenTextCheck(),
-        buttonElementEmptyAlt : await buttonElementEmptyAltCheck(),
+        unclosedTags:  detectUnclosedTagsFromDOM(),
+        emptyLinks:  detectEmptyLinks(),
+        missingHeaders:  detectMissingHeaders(),
+        lowContrastText:  checkTextContrast(),
+        smallText:  checkSmallText(),
+        missingLabels:  checkInputLabels(),
+        missingLangAttributes:  langElementsCheck(),
+        buttonElementAccesible :  buttonElementAccesibleCheck(),
+        buttonElementWhiteSpaceText :  buttonElementWhiteSpaceTextCheck(),
+        buttonElementNullText :  buttonElementNullTextCheck(),
+        buttonElementNoLabel :  buttonElementNoLabelCheck(),
+        buttonElementHiddenText :  buttonElementHiddenTextCheck(),
+        buttonElementEmptyAlt :  buttonElementEmptyAltCheck(),
         // buttonIssues: await buttonElementCheck(),
-        redundantLinks: await redundantLinkCheck(),
+        redundantLinks:  redundantLinkCheck(),
     };
 
     console.log("🔹 Accessibility issues collected:", issues);
-
-    // Now that issues are ready, create the iframe
-    const iframe = document.createElement("iframe");
-    iframe.width = "400px";
-    iframe.height = "850vh";
-    iframe.src = chrome.runtime.getURL('sidebar.html');
-    iframe.id = "iframe-container";
-
-    document.body.appendChild(iframe); // Append iframe **after** collecting issues
 
     console.log("🔹 Sending accessibility issues to background:", issues);
 
@@ -757,16 +751,12 @@ async function collectAccessibilityIssues() {
         (response) => {
             if (chrome.runtime.lastError) {
                 console.error("❌ Error sending message:", chrome.runtime.lastError);
-            } else if (response) {
-                console.log("✅ Message sent successfully! Response:", response);
             } else {
-                console.warn("⚠️ No response received from background.");
-            }
+                console.log("✅ Message sent successfully! Response:", response);
+            } 
         }
     );
 }
-
-
 // Call the function to detect issues and send them
 collectAccessibilityIssues();
 
