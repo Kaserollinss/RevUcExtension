@@ -436,6 +436,14 @@ function buttonElementAccesibleCheck(){
                 button.classList.add(uniqueClass);
                 // Add the new class to the list
                 buttonElementAccesibleCheckList.push(uniqueClass);
+
+                //inject icon
+                injectWarningIcon(
+                    button, 
+                    "assets/icons/broken_button.svg", 
+                    "Button has no accessible label", 
+                    button.outerHTML
+                );
             }
         });
     }
@@ -459,6 +467,14 @@ function buttonElementWhiteSpaceTextCheck(){
                 button.classList.add(uniqueClass);
                 // Add the new class to the list
                 buttonElementWhiteSpaceTextCheckList.push(uniqueClass);
+
+                //inject icon
+                injectWarningIcon(
+                    button, 
+                    "assets/icons/broken_button.svg", 
+                    "Button has only whitespace", 
+                    button.outerHTML
+                );
             }
         });
     }
@@ -482,6 +498,14 @@ function buttonElementNullTextCheck(){
                 button.classList.add(uniqueClass);
                 // Add the new class to the list
                 buttonElementNullTextCheckList.push(uniqueClass);
+
+                //inject icon
+                injectWarningIcon(
+                    button, 
+                    "assets/icons/broken_button.svg", 
+                    "Button has no text", 
+                    button.outerHTML
+                );
             }
         });
     }
@@ -508,6 +532,14 @@ function buttonElementNoLabelCheck(){
                 button.classList.add(uniqueClass);
                 // Add the new class to the list
                 buttonElementNoLabelCheckList.push(uniqueClass);
+
+                //inject icon
+                injectWarningIcon(
+                    button, 
+                    "assets/icons/broken_button.svg", 
+                    "Button has only an icon but no text or accessible label", 
+                    button.outerHTML
+                );
             }
         });
     }
@@ -535,6 +567,14 @@ function buttonElementHiddenTextCheck(){
                 button.classList.add(uniqueClass);
                 // Add the new class to the list
                 buttonElementHiddenTextCheckList.push(uniqueClass);
+
+                //inject icon
+                injectWarningIcon(
+                    button, 
+                    "assets/icons/broken_button.svg", 
+                    "Button has hidden or visually-invisible text", 
+                    button.outerHTML
+                );
             }
         });
     }
@@ -560,6 +600,14 @@ function buttonElementEmptyAltCheck(){
                     button.classList.add(uniqueClass);
                     // Add the new class to the list
                     buttonElementEmptyAltCheckList.push(uniqueClass);
+
+                    //inject icon
+                    injectWarningIcon(
+                        button, 
+                        "assets/icons/broken_button.svg", 
+                        "Button has an image but no alternative text", 
+                        button.outerHTML
+                    );
                 }
             }
         });
@@ -609,19 +657,6 @@ function redundantLinkCheck() {
 
     return detectRedundantLinksList;
 }
-
-
-
-// detectUnclosedTagsFromDOM();
-// detectEmptyLinks();
-// detectMissingHeaders();
-// checkTextContrast();
-// checkSkippedHeaderLevels();
-// checkSmallText();
-// checkInputLabels();
-// langElementsCheck();
-// buttonElementCheck();
-// redundantLinkCheck();
 
 async function collectAccessibilityIssues() {
     const issues = {
