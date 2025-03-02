@@ -104,9 +104,9 @@
             <span class="toggle">Styles: OFF <input type="checkbox"></span>
         </div>
         <div class="tabs">
-            <button class="active" onclick="switchTab(event, 'summaryPage')">Summary</button>
-            <button onclick="switchTab(event, 'detailsPage')">Details</button>
-            <button onclick="switchTab(event, 'aiFixesPage')">Ai Fixes</button>
+            <button id="summaryTab" class="active" onclick="switchTab(event, 'summaryPage')">Summary</button>
+            <button id="detailsTab" onclick="switchTab(event, 'detailsPage')">Details</button>
+            <button id="aiFixesTab" onclick="switchTab(event, 'aiFixesPage')">Ai Fixes</button>
         </div>
         <div id="summaryPage" class="content">
             <h3>Summary</h3>
@@ -155,24 +155,6 @@
     </div>
 </body>
 
-<script>
-    function switchTab(event, pageId) {
-        // Hide all content sections
-        document.querySelectorAll('.content').forEach(content => {
-            content.classList.add('hidden');
-        });
-
-        // Remove active class from all tabs
-        document.querySelectorAll('.tabs button').forEach(button => {
-            button.classList.remove('active');
-        });
-
-        // Show the selected page
-        document.getElementById(pageId).classList.remove('hidden');
-
-        // Set the clicked tab as active
-        event.target.classList.add('active');
-    }
-</script>
+<script src="sidebar.js"></script>
 
 </html>
