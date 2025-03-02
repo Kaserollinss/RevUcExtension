@@ -5,6 +5,12 @@ function injectWarningIcon(element, iconPath, explanation, htmlCode) {
         return;
     }
 
+    // Check if the element is inside the sidebar
+    if (element.closest("#sidebar")) {
+        console.log("Skipping icon injection for sidebar element:", element);
+        return;
+    }
+
     // Create the icon element
     let warningIcon = document.createElement("img");
     warningIcon.src = chrome.runtime.getURL(iconPath);
@@ -23,7 +29,7 @@ function injectWarningIcon(element, iconPath, explanation, htmlCode) {
     // Create HTML code section
     let htmlCodeSection = document.createElement("pre");
     htmlCodeSection.className = "tooltip-html-code";
-    htmlCodeSection.innerText = htmlCode.trim(); // Display problematic HTML
+    htmlCodeSection.innerText = htmlCode.trim();
 
     // Append sections to tooltip
     tooltip.appendChild(explanationSection);
@@ -33,7 +39,7 @@ function injectWarningIcon(element, iconPath, explanation, htmlCode) {
     let iconContainer = document.createElement("span");
     iconContainer.className = "accessibility-icon-container";
     iconContainer.appendChild(warningIcon);
-    iconContainer.appendChild(tooltip); // Append tooltip
+    iconContainer.appendChild(tooltip);
 
     // Insert the icon **AFTER** the problematic element
     element.parentNode.insertBefore(iconContainer, element.nextSibling);
@@ -41,6 +47,7 @@ function injectWarningIcon(element, iconPath, explanation, htmlCode) {
     // Adjust tooltip position after adding to DOM
     setTimeout(() => adjustTooltipPosition(tooltip), 50);
 }
+
 
 /**
  * Adjust tooltip position to prevent it from overflowing off-screen.
@@ -345,10 +352,10 @@ function checkSmallText() {
 
                 // Use `injectWarningIcon()` to add the tooltip and icon
                 injectWarningIcon(
-                    this, 
+                    el, 
                     "assets/icons/small_text.svg", 
                     `This text is too small (Font size: ${fontSize}px). Recommended size is 16px or larger for readability.`,
-                    this.outerHTML
+                    el.outerHTML
                 );
             }
         }
@@ -568,55 +575,55 @@ function collectAccessibilityIssues() {
 // Call the function to detect issues and send them
 collectAccessibilityIssues();
 
-async function testGeminiAPI() {
-    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with your actual API key
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    const unclosedTagSize = (detectUnclosedTagsFromDOM()).length;
-    const emptyLinkSize = (detectEmptyLinks()).length;
-    const redundantLinkSize = (redundantLinkCheck()).length;
-    const smallTextSize = (checkSmallText()).length;
-    const inputLabelSize = (checkInputLabels()).length;
-    const langElementsSize = (langElementsCheck()).length;
-    const prompt = `
-        Based on the following data, please provide a detailed summary for the user. The summary should include:
+// async function testGeminiAPI() {
+//     const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with your actual API key
+//     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+//     const unclosedTagSize = (detectUnclosedTagsFromDOM()).length;
+//     const emptyLinkSize = (detectEmptyLinks()).length;
+//     const redundantLinkSize = (redundantLinkCheck()).length;
+//     const smallTextSize = (checkSmallText()).length;
+//     const inputLabelSize = (checkInputLabels()).length;
+//     const langElementsSize = (langElementsCheck()).length;
+//     const prompt = `
+//         Based on the following data, please provide a detailed summary for the user. The summary should include:
 
-        1. An explanation of each error found on the website, describing what each error means.
-        2. An explanation of why these errors are important, particularly from an accessibility perspective.
-        3. Suggestions on how to resolve these issues, along with recommendations to improve website accessibility and reduce potential accessibility issues.
+//         1. An explanation of each error found on the website, describing what each error means.
+//         2. An explanation of why these errors are important, particularly from an accessibility perspective.
+//         3. Suggestions on how to resolve these issues, along with recommendations to improve website accessibility and reduce potential accessibility issues.
 
-        Here is the data:
-        - Unclosed tags: ${unclosedTagSize}
-        - Empty links: ${emptyLinkSize}
-        - Redundant links: ${redundantLinkSize}
-        - Small text elements: ${smallTextSize}
-        - Missing input labels: ${inputLabelSize}
-        - Language elements: ${langElementsSize}
-    `;
-    const requestBody = {
-        contents: [{ parts: [{ text: prompt }] }]
-    };
+//         Here is the data:
+//         - Unclosed tags: ${unclosedTagSize}
+//         - Empty links: ${emptyLinkSize}
+//         - Redundant links: ${redundantLinkSize}
+//         - Small text elements: ${smallTextSize}
+//         - Missing input labels: ${inputLabelSize}
+//         - Language elements: ${langElementsSize}
+//     `;
+//     const requestBody = {
+//         contents: [{ parts: [{ text: prompt }] }]
+//     };
 
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestBody)
-        });
+//     try {
+//         const response = await fetch(url, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json"
+//             },
+//             body: JSON.stringify(requestBody)
+//         });
 
-        const data = await response.json();
-        const rawText = data.candidates[0].content.parts[0].text;
-        const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
-        const displayText = cleanedText;
-        // Display it in your HTML (assuming there's an element with id "geminiResponse")
-        //document.getElementById("geminiResponse").innerText = displayText;
-        console.log("Cleaned Text:", displayText);
+//         const data = await response.json();
+//         const rawText = data.candidates[0].content.parts[0].text;
+//         const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
+//         const displayText = cleanedText;
+//         // Display it in your HTML (assuming there's an element with id "geminiResponse")
+//         //document.getElementById("geminiResponse").innerText = displayText;
+//         console.log("Cleaned Text:", displayText);
 
-    } catch (error) {
-        console.error("Error testing Gemini API:", error);
-    }
-}
+//     } catch (error) {
+//         console.error("Error testing Gemini API:", error);
+//     }
+// }
 
 // Run the test function
 // document.addEventListener('DOMContentLoaded', () => {
