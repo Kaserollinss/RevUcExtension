@@ -1,7 +1,7 @@
 .accessibility-warning-icon {
-    width: 16px;
-    height: 16px;
-    margin-left: 5px;
-    vertical-align: middle;
-    cursor: pointer;
+    width: 64px !important; /* Ensures a fixed size */
+    height: 64px !important; /* Ensures a fixed size */
+    display: inline-block; /* Prevents collapsing */
+    vertical-align: middle; /* Aligns with text */
+    margin-left: 5px; /* Adds spacing from the element */
 }
