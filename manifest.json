@@ -20,7 +20,17 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/icons/warning.svg"],
+      "resources": [
+        "assets/icons/warning.svg",
+        "assets/icons/broken_button.svg",
+        "assets/icons/broken_link.svg",
+        "assets/icons/broken_tag.svg",
+        "assets/icons/low_contrast.svg",
+        "assets/icons/missing_label_header.svg",
+        "assets/icons/missing_lang_attr.svg",
+        "assets/icons/redundant_link.svg",
+        "assets/icons/small_text.svg"
+    ],
       "matches": ["<all_urls>"]
     }
   ]

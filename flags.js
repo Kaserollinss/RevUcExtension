@@ -23,23 +23,37 @@ function detectUnclosedTagsFromDOM() {
 
 //ERROR: detect empty links
 function detectEmptyLinks() {
+    console.log("empty link EXECUTED");
     const links = document.querySelectorAll("a"); // Get all <a> elements
     const emptyLinks = [];
+
     links.forEach((link) => {
         if (!link.hasAttribute("href") || link.getAttribute("href").trim() === "") {
             emptyLinks.push(link);
         }
     });
+
     if (emptyLinks.length > 0) {
         console.warn(`❌ Found ${emptyLinks.length} <a> tags without an href:`, emptyLinks);
+        
         emptyLinks.forEach((link, index) => {
             link.style.border = "2px solid red"; // Highlight them on the page
             console.warn(`Missing href in <a> tag #${index + 1}:`, link.outerHTML);
+            
+            // Create and inject the warning icon
+            let warningIcon = document.createElement("img");
+            warningIcon.src = chrome.runtime.getURL("assets/icons/broken_link.svg");
+            warningIcon.alt = "Warning: Broken link";
+            warningIcon.className = "accessibility-warning-icon"; // Add a CSS class for styling
+            
+            // Insert the icon after the empty link
+            link.parentNode.insertBefore(warningIcon, link.nextSibling);
         });
     } else {
         console.log("✅ All <a> tags have valid href attributes.");
     }
 }
+
 
 //WARNING: detect missing headers
 function detectMissingHeaders() {
