@@ -57,9 +57,27 @@ function displayAccessibilitySummary(data) {
     // Iterate over the issues and display them
     for (const [issue, elements] of Object.entries(data)) {
         if (elements && elements.length > 0) {
+            // Add to summary page
+            
+
             let issueElement = document.createElement("div");
             issueElement.className = "issue-item";
             issueElement.innerHTML = `<strong>${issue.replace(/([A-Z])/g, ' $1')}:</strong> ${elements.length} issues found`;
+            elements.forEach((element) =>{
+                const row = document.createElement("div")
+                row.style.display = 'flex'; // Use Flexbox
+                row.style.alignItems = 'center'; // Align items vertically
+                row.style.gap = '10px'; // Add some spacing
+                const checkbox = document.createElement("input")
+                checkbox.type = 'checkbox'
+                const p = document.createElement('p');
+                p.textContent = element
+                row.appendChild(checkbox)
+                row.appendChild(p)
+                issueElement.appendChild(row)
+                //row.appendChild(checkbox)
+
+            })
             sidebarContainer.appendChild(issueElement);
         }
     }
