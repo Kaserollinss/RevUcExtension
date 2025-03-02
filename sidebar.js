@@ -90,7 +90,14 @@ function displayAccessibilitySummary(data) {
                 link.setAttribute('role', 'button');
                 link.setAttribute('aria-expanded', 'false');
                 link.setAttribute('aria-controls', `${issue}-target`);
-                link.textContent = 'V';
+                const dropdownIcon = document.createElement('img');
+                dropdownIcon.src = "Assets/Icons/dropdown.svg";  // Ensure this path is correct
+                dropdownIcon.alt = "Dropdown";  // Accessibility improvement
+                dropdownIcon.style.width = "16px";  // Adjust the size as needed
+                dropdownIcon.style.height = "16px";
+
+                link.appendChild(dropdownIcon);
+
 
                 // Create issue element
                 let issueElement = document.createElement('div');
