@@ -194,18 +194,20 @@ $(document).ready(function () {
 
 // WARNING: Small text
 $("*").each(function() {
-    let fontSize = parseFloat($(this).css("font-size"));
-    if (fontSize < 16) {
-        console.warn(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
-        
-        // Add warning icon next to the element
-        var warningIcon = $("<img>", {
-            src: chrome.runtime.getURL("assets/icons/warning.svg"),
-            alt: "Warning: Small text",
-            class: "accessibility-warning-icon"
-        });
+    if (this.style && this.style.fontSize) {
+        let fontSize = parseFloat($(this).css("font-size"));
+        if (fontSize < 16) {
+            console.log(`❌ Font size too small in <${this.tagName.toLowerCase()}> element:`, this);
 
-        $(this).after(warningIcon);
+            // Add warning icon next to the element
+            var warningIcon = $("<img>", {
+                src: chrome.runtime.getURL("assets/icons/warning.svg"),
+                alt: "Warning: Small text",
+                class: "accessibility-warning-icon"
+            });
+
+            $(this).after(warningIcon);
+        }
     }
 });
 
