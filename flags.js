@@ -123,21 +123,21 @@ function checkInputLabels() {
 //WARNING: Check good text contrast
 function checkTextContrast() {
     $(document).ready(function () {
-    
-        // Helper function to calculate luminance of a color
+
+        // Helper function to calculate luminance
         function luminance(rgb) {
             var r = rgb[0] / 255;
             var g = rgb[1] / 255;
             var b = rgb[2] / 255;
-    
+
             r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
             g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
             b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
-    
+
             return 0.2126 * r + 0.7152 * g + 0.0722 * b;
         }
-    
-        // Helper function to calculate the contrast ratio
+
+        // Helper function to calculate contrast ratio
         function calculateContrast(rgb1, rgb2) {
             var lum1 = luminance(rgb1);
             var lum2 = luminance(rgb2);
@@ -145,9 +145,11 @@ function checkTextContrast() {
             var dark = Math.min(lum1, lum2);
             return (light + 0.05) / (dark + 0.05);
         }
-    
+
         // Convert a color (hex or rgb) to RGB array [r, g, b]
         function hexToRgb(color) {
+            if (!color) return null;
+
             var result;
             if (color.startsWith('rgb')) {
                 result = color.match(/(\d+),\s*(\d+),\s*(\d+)/);
@@ -164,61 +166,73 @@ function checkTextContrast() {
             }
             return null;
         }
-    
-        // Function to get the computed background color, accounting for inheritance
+
+        // Function to get effective background color (fix for transparency issues)
         function getEffectiveBackgroundColor(element) {
             let bgColor;
             while (element.length && element[0] !== document) { 
                 bgColor = element.css('background-color');
-        
+
                 if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
                     return bgColor;
                 }
-        
-                // Move up the DOM tree safely
+
                 element = element.parent();
-                if (!element.length) break;  // Prevent null reference errors
+                if (!element.length) break; 
             }
             return 'rgb(255, 255, 255)'; // Default to white if no background found
         }
-        
-    
+
         // Function to check for low contrast
         function checkContrast() {
             $("*").each(function () {
                 var element = $(this);
                 var color = element.css('color');
-                var backgroundColor = element.css('background-color');
-        
+                var backgroundColor = getEffectiveBackgroundColor(element); // Use inherited background
+
                 if (color && backgroundColor) {
                     var textColor = hexToRgb(color);
                     var bgColor = hexToRgb(backgroundColor);
-        
+
                     if (textColor && bgColor) {
                         var contrastRatio = calculateContrast(textColor, bgColor);
-        
+
                         if (contrastRatio < 4.5) {
-                            console.log(`❌ Low contrast detected on ${element[0].tagName}. Ratio: ${contrastRatio.toFixed(2)}`);
-        
-                            // Add red border
-                            element.css("border", "2px solid red");
-        
-                            // Add warning icon
+                            console.warn(`❌ Low contrast detected on <${element[0].tagName.toLowerCase()}>. Ratio: ${contrastRatio.toFixed(2)}`, element[0]);
+
+                            // Ensure red border is visible on inline elements
+                            if (element.css("display") === "inline") {
+                                element.css({
+                                    "border-bottom": "2px solid red",
+                                    "padding-bottom": "2px"
+                                });
+                            } else {
+                                element.css("border", "2px solid red");
+                            }
+
+                            // Ensure icon is visible
                             var warningIcon = $("<img>", {
                                 src: chrome.runtime.getURL("assets/icons/low_contrast.svg"),
                                 alt: "Warning: Low contrast",
                                 class: "accessibility-warning-icon"
                             });
-        
-                            element.after(warningIcon);
+
+                            // Handle positioning for inline elements
+                            if (element.css("display") === "inline") {
+                                element.after($("<span>").append(warningIcon));
+                            } else {
+                                element.after(warningIcon);
+                            }
                         }
                     }
                 }
             });
-        }    
+        }
+        
         checkContrast();
     });
 }
+
 
 // WARNING: Small text
 function checkSmallText() {
