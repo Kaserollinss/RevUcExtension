@@ -6,7 +6,7 @@ function injectWarningIcon(element, iconPath, explanation, htmlCode) {
     }
 
     // Check if the element is inside the sidebar
-    if (element.closest("#sidebar")) {
+    if (element.closest(".sidebar")) {
         console.log("Skipping icon injection for sidebar element:", element);
         return;
     }
@@ -417,7 +417,7 @@ function langElementsCheck() {
 }
 
 //ERROR: Button check
-function buttonElementCheck() {
+async function buttonElementCheck() {
     const buttons = document.querySelectorAll('button');
 
     if (buttons.length === 0) {
@@ -542,18 +542,29 @@ function redundantLinkCheck() {
 // buttonElementCheck();
 // redundantLinkCheck();
 
-function collectAccessibilityIssues() {
+async function collectAccessibilityIssues() {
     const issues = {
-        unclosedTags: detectUnclosedTagsFromDOM(),
-        emptyLinks: detectEmptyLinks(),
-        missingHeaders: detectMissingHeaders(),
-        lowContrastText: checkTextContrast(),
-        smallText: checkSmallText(),
-        missingLabels: checkInputLabels(),
-        missingLangAttributes: langElementsCheck(),
-        buttonIssues: buttonElementCheck(),
-        redundantLinks: redundantLinkCheck(),
+        unclosedTags: await detectUnclosedTagsFromDOM(),
+        emptyLinks: await detectEmptyLinks(),
+        missingHeaders: await detectMissingHeaders(),
+        lowContrastText: await checkTextContrast(),
+        smallText: await checkSmallText(),
+        missingLabels: await checkInputLabels(),
+        missingLangAttributes: await langElementsCheck(),
+        buttonIssues: await buttonElementCheck(),
+        redundantLinks: await redundantLinkCheck(),
     };
+
+    console.log("🔹 Accessibility issues collected:", issues);
+
+    // Now that issues are ready, create the iframe
+    const iframe = document.createElement("iframe");
+    iframe.width = "400px";
+    iframe.height = "850vh";
+    iframe.src = chrome.runtime.getURL('sidebar.html');
+    iframe.id = "iframe-container";
+
+    document.body.appendChild(iframe); // Append iframe **after** collecting issues
 
     console.log("🔹 Sending accessibility issues to background:", issues);
 
@@ -570,6 +581,7 @@ function collectAccessibilityIssues() {
         }
     );
 }
+
 
 // Call the function to detect issues and send them
 collectAccessibilityIssues();
