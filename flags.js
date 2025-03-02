@@ -460,13 +460,43 @@ function redundantLinkCheck() {
 
 
 
-detectUnclosedTagsFromDOM();
-detectEmptyLinks();
-detectMissingHeaders();
-checkTextContrast();
-checkSkippedHeaderLevels();
-checkSmallText();
-checkInputLabels();
-langElementsCheck();
-buttonElementCheck();
-redundantLinkCheck();
+// detectUnclosedTagsFromDOM();
+// detectEmptyLinks();
+// detectMissingHeaders();
+// checkTextContrast();
+// checkSkippedHeaderLevels();
+// checkSmallText();
+// checkInputLabels();
+// langElementsCheck();
+// buttonElementCheck();
+// redundantLinkCheck();
+
+function collectAccessibilityIssues() {
+    const issues = {
+        unclosedTags: detectUnclosedTagsFromDOM(),
+        emptyLinks: detectEmptyLinks(),
+        missingHeaders: detectMissingHeaders(),
+        lowContrastText: checkTextContrast(),
+        smallText: checkSmallText(),
+        missingLabels: checkInputLabels(),
+        missingLangAttributes: langElementsCheck(),
+        buttonIssues: buttonElementCheck(),
+        redundantLinks: redundantLinkCheck(),
+    };
+
+    console.log("🔹 Sending accessibility issues to sidebar:", issues);
+
+    chrome.runtime.sendMessage(
+        { type: "accessibilityIssues", data: issues },
+        (response) => {
+            if (chrome.runtime.lastError) {
+                console.error("❌ Error sending message:", chrome.runtime.lastError);
+            } else {
+                console.log("✅ Message sent successfully! Response:", response);
+            }
+        }
+    );
+}
+
+// Call the function to detect issues and send them
+collectAccessibilityIssues();
