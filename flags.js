@@ -347,7 +347,7 @@ function checkSmallText() {
                 detectSmallTextList.push(uniqueClass);
 
                 // Add red border
-                el.style.border = "2px solid red";
+                el.style.border = "2px solid #E79F00";
 
                 // Use `injectWarningIcon()` to add the tooltip and icon
                 injectWarningIcon(
@@ -416,75 +416,6 @@ function langElementsCheck() {
     return detectMissingLangAttributeList;
 }
 
-//ERROR: Button check
-// async function buttonElementCheck() {
-//     const buttons = document.querySelectorAll('button');
-
-//     if (buttons.length === 0) {
-//         console.log('✅ No buttons found on the page.');
-//         return;
-//     }
-
-//     buttons.forEach(button => {
-//         const buttonText = button.textContent.trim();
-//         const ariaLabel = button.getAttribute('aria-label');
-//         const title = button.getAttribute('title');
-//         const hasIcon = button.querySelector('img, svg') !== null;
-//         const style = window.getComputedStyle(button);
-//         const isHidden = style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0 || parseFloat(style.height) === 0 || parseFloat(style.width) === 0;
-//         const img = button.querySelector('img');
-
-//         let isProblematic = false;
-//         let issues = [];
-
-//         // Check for missing accessible labels
-//         if (!ariaLabel && !title) {
-//             issues.push('No accessible label');
-//             isProblematic = true;
-//         }
-
-//         // Check for whitespace-only or missing text
-//         if (buttonText === '') {
-//             issues.push('Only whitespace or no text');
-//             isProblematic = true;
-//         }
-
-//         // Check for button with only an icon but no label
-//         if (hasIcon && buttonText === '' && !ariaLabel && !title) {
-//             issues.push('Only an icon, no label');
-//             isProblematic = true;
-//         }
-
-//         // Check for hidden or visually-invisible text
-//         if (isHidden) {
-//             issues.push('Hidden or visually-invisible text');
-//             isProblematic = true;
-//         }
-
-//         // Check for images without alternative text
-//         if (img) {
-//             const altText = img.getAttribute('alt');
-//             if (!altText) {
-//                 issues.push('Image in button has no alternative text');
-//                 isProblematic = true;
-//             }
-//         }
-
-//         // Log issues and inject warning icon if necessary
-//         if (isProblematic) {
-//             console.warn(`❌ Button issue(s): ${issues.join(', ')}`, button);
-//             button.style.border = "2px solid red";
-//             // Inject warning icon
-//             let warningIcon = document.createElement("img");
-//             warningIcon.src = chrome.runtime.getURL("assets/icons/broken_button.svg");
-//             warningIcon.alt = "Warning: Inaccessible button";
-//             warningIcon.className = "accessibility-warning-icon"; // Add a CSS class for styling
-
-//             // Insert the icon after the problematic button
-//             button.parentNode.insertBefore(warningIcon, button.nextSibling);
-//         }
-//     });
-// }
 
 //ERROR : Button Check - no aria label
 function buttonElementAccesibleCheck(){
@@ -648,7 +579,7 @@ function redundantLinkCheck() {
 
         if (href && hrefs.has(href)) {
             // Assign a unique class
-            const uniqueClass = `detectRedundantLinks-${detectRedundantLinksList?.length || 0}`;
+            const uniqueClass = `detectRedundantLinks-${detectRedundantLinksList.length}`;
             link.classList.add('detectRedundantLinks');
             link.classList.add(uniqueClass);
             // Add the new class to the list
@@ -663,18 +594,19 @@ function redundantLinkCheck() {
         console.warn(`❌ Redundant Links found (${redundantLinks.length}):`, redundantLinks);
 
         redundantLinks.forEach(link => {
-            // Add red border
+            // Add red border for visibility
             link.style.border = "2px solid #E79F00";
 
-            // Insert warning icon
-            let warningIcon = document.createElement("img");
-            warningIcon.src = chrome.runtime.getURL("assets/icons/redundant_link.svg");
-            warningIcon.alt = "Warning: Redundant link";
-            warningIcon.className = "accessibility-warning-icon";
-
-            link.parentNode.insertBefore(warningIcon, link.nextSibling);
+            // Inject warning icon
+            injectWarningIcon(
+                link, 
+                "assets/icons/redundant_link.svg", 
+                "Redundant Link: Multiple links on the same page point to the same destination.", 
+                link.outerHTML
+            );
         });
     }
+
     return detectRedundantLinksList;
 }
 
@@ -741,60 +673,60 @@ async function collectAccessibilityIssues() {
 // Call the function to detect issues and send them
 collectAccessibilityIssues();
 
-// async function testGeminiAPI() {
-//     const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with your actual API key
-//     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-//     const unclosedTagSize = (detectUnclosedTagsFromDOM()).length;
-//     const emptyLinkSize = (detectEmptyLinks()).length;
-//     const redundantLinkSize = (redundantLinkCheck()).length;
-//     const smallTextSize = (checkSmallText()).length;
-//     const inputLabelSize = (checkInputLabels()).length;
-//     const langElementsSize = (langElementsCheck()).length;
-//     const prompt = `
-//         Based on the following data, please provide a detailed summary for the user. The summary should include:
+async function testGeminiAPI() {
+    const apiKey = "AIzaSyAH71xOefWJ4US4G6HE-mQ8AOdsAoApi9M"; // Replace with your actual API key
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const unclosedTagSize = (detectUnclosedTagsFromDOM()).length;
+    const emptyLinkSize = (detectEmptyLinks()).length;
+    const redundantLinkSize = (redundantLinkCheck()).length;
+    const smallTextSize = (checkSmallText()).length;
+    const inputLabelSize = (checkInputLabels()).length;
+    const langElementsSize = (langElementsCheck()).length;
+    const prompt = `
+        Based on the following data, please provide a detailed summary for the user. The summary should include:
 
-//         1. An explanation of each error found on the website, describing what each error means.
-//         2. An explanation of why these errors are important, particularly from an accessibility perspective.
-//         3. Suggestions on how to resolve these issues, along with recommendations to improve website accessibility and reduce potential accessibility issues.
+        1. An explanation of each error found on the website, describing what each error means.
+        2. An explanation of why these errors are important, particularly from an accessibility perspective.
+        3. Suggestions on how to resolve these issues, along with recommendations to improve website accessibility and reduce potential accessibility issues.
 
-//         Here is the data:
-//         - Unclosed tags: ${unclosedTagSize}
-//         - Empty links: ${emptyLinkSize}
-//         - Redundant links: ${redundantLinkSize}
-//         - Small text elements: ${smallTextSize}
-//         - Missing input labels: ${inputLabelSize}
-//         - Language elements: ${langElementsSize}
-//     `;
-//     const requestBody = {
-//         contents: [{ parts: [{ text: prompt }] }]
-//     };
+        Here is the data:
+        - Unclosed tags: ${unclosedTagSize}
+        - Empty links: ${emptyLinkSize}
+        - Redundant links: ${redundantLinkSize}
+        - Small text elements: ${smallTextSize}
+        - Missing input labels: ${inputLabelSize}
+        - Language elements: ${langElementsSize}
+    `;
+    const requestBody = {
+        contents: [{ parts: [{ text: prompt }] }]
+    };
 
-//     try {
-//         const response = await fetch(url, {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json"
-//             },
-//             body: JSON.stringify(requestBody)
-//         });
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
 
-//         const data = await response.json();
-//         const rawText = data.candidates[0].content.parts[0].text;
-//         const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
-//         const displayText = cleanedText;
-//         // Display it in your HTML (assuming there's an element with id "geminiResponse")
-//         //document.getElementById("geminiResponse").innerText = displayText;
-//         console.log("Cleaned Text:", displayText);
+        const data = await response.json();
+        const rawText = data.candidates[0].content.parts[0].text;
+        const cleanedText = rawText.replace(/\*\*/g, '').replace(/\*/g, '').trim();
+        const displayText = cleanedText;
+        // Display it in your HTML (assuming there's an element with id "geminiResponse")
+        //document.getElementById("geminiResponse").innerText = displayText;
+        console.log("Cleaned Text:", displayText);
 
-//     } catch (error) {
-//         console.error("Error testing Gemini API:", error);
-//     }
-// }
+    } catch (error) {
+        console.error("Error testing Gemini API:", error);
+    }
+}
 
-// Run the test function
-// document.addEventListener('DOMContentLoaded', () => {
-//     console.log('hiii');
-//     document.getElementById('generateReport').addEventListener('click', function(){
-//         testGeminiAPI();
-//     });
-// });
+//Run the test function
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('hiii');
+    document.getElementById('generateReport').addEventListener('click', function(){
+        testGeminiAPI();
+    });
+});
