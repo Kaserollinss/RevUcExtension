@@ -486,6 +486,155 @@ async function buttonElementCheck() {
     });
 }
 
+//ERROR : Button Check - no aria label
+function buttonElementAccesibleCheck(){
+    let buttonElementAccesibleCheckList = [];
+    const buttons = document.querySelectorAll('button');
+    if (buttons.length == 0) {
+    } else {
+        buttons.forEach(button => {
+            const ariaLabel = button.getAttribute('aria-label');
+            const title = button.getAttribute('title');
+
+            // Check and log the cases for no accessible label
+            if (!ariaLabel && !title) {
+                console.log('❌ Button has no accessible label:', button);
+                // Assign a unique class
+                const uniqueClass = `buttonElementAccesibleCheck-${buttonElementAccesibleCheckList.length}`;
+                button.classList.add('buttonElementAccesibleCheck');
+                button.classList.add(uniqueClass);
+                // Add the new class to the list
+                buttonElementAccesibleCheckList.push(uniqueClass);
+            }
+        });
+    }
+    return buttonElementAccesibleCheckList;
+}
+//ERROR : Button Check - text only whitespace
+function buttonElementWhiteSpaceTextCheck(){
+    let buttonElementWhiteSpaceTextCheckList = [];
+    const buttons = document.querySelectorAll('button');
+    if (buttons.length == 0) {
+    } else {
+        buttons.forEach(button => {
+            const buttonText = button.textContent.trim();
+
+            // Check and log the cases for whitespace only
+            if (buttonText === '') {
+                console.log('❌ Button has only whitespace:', button);
+                // Assign a unique class
+                const uniqueClass = `buttonElementWhiteSpaceTextCheck-${buttonElementWhiteSpaceTextCheckList.length}`;
+                button.classList.add('buttonElementWhiteSpaceTextCheck');
+                button.classList.add(uniqueClass);
+                // Add the new class to the list
+                buttonElementWhiteSpaceTextCheckList.push(uniqueClass);
+            }
+        });
+    }
+    return buttonElementWhiteSpaceTextCheckList;
+}
+//ERROR : Button Check - no text
+function buttonElementNullTextCheck(){
+    let buttonElementNullTextCheckList = [];
+    const buttons = document.querySelectorAll('button');
+    if (buttons.length == 0) {
+    } else {
+        buttons.forEach(button => {
+            const buttonText = button.textContent.trim();
+
+            // Check and log the cases for no text
+            if (buttonText === null) {
+                console.log('❌ Button has no text:', button);
+                // Assign a unique class
+                const uniqueClass = `buttonElementNullTextCheck-${buttonElementNullTextCheckList.length}`;
+                button.classList.add('buttonElementNullTextCheck');
+                button.classList.add(uniqueClass);
+                // Add the new class to the list
+                buttonElementNullTextCheckList.push(uniqueClass);
+            }
+        });
+    }
+    return buttonElementNullTextCheckList;
+}
+//ERROR : Button Check - with icon but no label
+function buttonElementNoLabelCheck(){
+    let buttonElementNoLabelCheckList = [];
+    const buttons = document.querySelectorAll('button');
+    if (buttons.length == 0) {
+    } else {
+        buttons.forEach(button => {
+            const buttonText = button.textContent.trim();
+            const ariaLabel = button.getAttribute('aria-label');
+            const title = button.getAttribute('title');
+            const hasIcon = button.querySelector('img, svg') !== null;
+
+            // Check and log the cases for a Button with Only an Icon but No Label
+            if (hasIcon && buttonText === '' && !ariaLabel && !title) {
+                console.log('❌ Button has only an icon but no text or accessible label:', button);
+                // Assign a unique class
+                const uniqueClass = `buttonElementNoLabelCheck-${buttonElementNoLabelCheckList.length}`;
+                button.classList.add('buttonElementNoLabelCheck');
+                button.classList.add(uniqueClass);
+                // Add the new class to the list
+                buttonElementNoLabelCheckList.push(uniqueClass);
+            }
+        });
+    }
+    return buttonElementNoLabelCheckList;
+}
+//ERROR : Button Check - hidden text
+function buttonElementHiddenTextCheck(){
+    let buttonElementHiddenTextCheckList = [];
+    const buttons = document.querySelectorAll('button');
+    if (buttons.length == 0) {
+    } else {
+        buttons.forEach(button => {
+            const isHidden = button.style.display === 'none' ||
+            button.style.visibility === 'hidden' ||
+            parseFloat(button.style.opacity) === 0 ||
+            parseFloat(button.style.height) === 0 ||
+            parseFloat(button.style.width) === 0;
+
+            // Check and log the case for a button with hidden or visually-invisible text
+            if (isHidden) {
+                console.log('❌ Button has hidden or visually-invisible text:', button);
+                // Assign a unique class
+                const uniqueClass = `buttonElementHiddenTextCheck-${buttonElementHiddenTextCheckList.length}`;
+                button.classList.add('buttonElementHiddenTextCheck');
+                button.classList.add(uniqueClass);
+                // Add the new class to the list
+                buttonElementHiddenTextCheckList.push(uniqueClass);
+            }
+        });
+    }
+    return buttonElementHiddenTextCheckList;
+}
+//ERROR : Button Check - empty alt
+function buttonElementEmptyAltCheck(){
+    let buttonElementEmptyAltCheckList = [];
+    const buttons = document.querySelectorAll('button');
+    if (buttons.length == 0) {
+    } else {
+        buttons.forEach(button => {
+            const img = button.querySelector('img');
+
+            // Check and log if the image has an alt attribute or if it's empty
+            if (img) {
+                const altText = img.getAttribute('alt');
+                if (!altText) {
+                    console.log('❌ Button has an image but no alternative text:', button);
+                    // Assign a unique class
+                    const uniqueClass = `buttonElementEmptyAltCheck-${buttonElementEmptyAltCheckList.length}`;
+                    button.classList.add('buttonElementEmptyAltCheck');
+                    button.classList.add(uniqueClass);
+                    // Add the new class to the list
+                    buttonElementEmptyAltCheckList.push(uniqueClass);
+                }
+            }
+        });
+    }
+    return buttonElementEmptyAltCheckList;
+}
 
 //WARNING: Redundant link check
 function redundantLinkCheck() {
@@ -551,7 +700,13 @@ async function collectAccessibilityIssues() {
         smallText: await checkSmallText(),
         missingLabels: await checkInputLabels(),
         missingLangAttributes: await langElementsCheck(),
-        buttonIssues: await buttonElementCheck(),
+        buttonElementAccesible : await buttonElementAccesibleCheck(),
+        buttonElementAccesible : await buttonElementWhiteSpaceTextCheck(),
+        buttonElementAccesible : await buttonElementNullTextCheck(),
+        buttonElementAccesible : await buttonElementNoLabelCheck(),
+        buttonElementAccesible : await buttonElementHiddenTextCheck(),
+        buttonElementAccesible : await buttonElementEmptyAltCheck(),
+        // buttonIssues: await buttonElementCheck(),
         redundantLinks: await redundantLinkCheck(),
     };
 
