@@ -75,6 +75,23 @@ function displayAccessibilitySummary(data) {
     // Clear previous content
     sidebarContainer.innerHTML = "";
 
+    const issueNames = {
+        unclosedTags: "Unclosed HTML Tags",
+        emptyLinks: "Empty Links (No Href)",
+        missingHeaders: "Missing Header Tags",
+        lowContrastText: "Low Contrast Text",
+        smallText: "Text Too Small",
+        missingLabels: "Inputs Without Labels",
+        missingLangAttributes: "Missing Language Attribute",
+        buttonElementAccesible: "Buttons Without Labels",
+        buttonElementWhiteSpaceText: "Buttons With Only Whitespace",
+        buttonElementNullText: "Buttons Without Text",
+        buttonElementNoLabel: "Buttons With Only Icons",
+        buttonElementHiddenText: "Buttons With Hidden Text",
+        buttonElementEmptyAlt: "Buttons With Missing Alt Text",
+        redundantLinks: "Redundant Links (Same URL Repeated)",
+    };
+
     // Iterate over the issues and display them
     for (const [issue, elements] of Object.entries(data)) {
         if (elements && elements.length > 0) {
@@ -103,7 +120,9 @@ function displayAccessibilitySummary(data) {
                 let issueElement = document.createElement('div');
                 issueElement.id = issue;
                 issueElement.className = 'issue-item mt-3';
-                issueElement.innerHTML = `<strong>${issue.replace(/([A-Z])/g, ' $1')}:</strong> ${elements.length} issues found`;
+                const issueTitle = issueNames[issue] || issue.replace(/([A-Z])/g, ' $1'); // Default fallback
+                issueElement.innerHTML = `<strong>${issueTitle}:</strong> ${elements.length} issues found`;
+
                 issueElement.appendChild(link);
 
                 // Create collapsible container

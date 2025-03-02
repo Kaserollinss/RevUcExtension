@@ -724,7 +724,7 @@ function redundantLinkCheck() {
 
 
 async function collectAccessibilityIssues() {
-    console.log("🔹 Collecting accessibility issues...");
+    console.log("🔹 Collecting accessibility issues...");    
 
     const issues = {
         unclosedTags: detectUnclosedTagsFromDOM(),
