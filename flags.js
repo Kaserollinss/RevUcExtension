@@ -168,18 +168,17 @@ function detectMissingHeaders() {
     }
 }
 
-//WARNING: Check for input labels
+// WARNING: Check for input labels
 function checkInputLabels() {
     let detectMissingLabelsList = [];
-    const inputs = document.querySelectorAll("input");
+    const inputs = document.querySelectorAll("input"); // ✅ Removed duplicate declaration
 
     inputs.forEach(function(element, index) {
         const inputId = element.getAttribute('id');
         let hasLabel = false;
-    const inputs = document.querySelectorAll("input");
 
         // Check if an input has a corresponding label with a "for" attribute matching its id
-        if (inputId && document.querySelectorAll("label[for='" + inputId + "']").length > 0) {
+        if (inputId && document.querySelectorAll(`label[for='${inputId}']`).length > 0) {
             hasLabel = true;
         }
 
@@ -345,10 +344,10 @@ function checkSmallText() {
 
                 // Use `injectWarningIcon()` to add the tooltip and icon
                 injectWarningIcon(
-                    this, 
+                    el, 
                     "assets/icons/small_text.svg", 
                     `This text is too small (Font size: ${fontSize}px). Recommended size is 16px or larger for readability.`,
-                    this.outerHTML
+                    el.outerHTML
                 );
             }
         }
